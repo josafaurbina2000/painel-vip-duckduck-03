@@ -55,10 +55,10 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      {/* Segunda linha - Stats cards e Centro de Notificações */}
+      {/* Segunda linha - Stats cards compactos e Centro de Notificações */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Stats cards ocupando 2 colunas */}
-        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
           <StatsCard
             title="VIPs Ativos"
             value={stats.totalActive}
@@ -79,7 +79,7 @@ const Dashboard = () => {
           />
         </div>
 
-        {/* Centro de Notificações ocupando 2 colunas com aspecto mais quadrado */}
+        {/* Centro de Notificações ocupando 2 colunas */}
         <div className="lg:col-span-2">
           <NotificationSystem vips={vips} />
         </div>

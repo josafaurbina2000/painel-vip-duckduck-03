@@ -32,23 +32,23 @@ const StatsCard = ({ title, value, icon: Icon, description, trend, color = 'defa
   };
 
   return (
-    <Card className={`relative overflow-hidden bg-gradient-to-br ${colorClasses[color]} border transition-all duration-300 hover:scale-105 hover:shadow-lg`}>
-      <CardContent className="p-6">
+    <Card className={`relative overflow-hidden bg-gradient-to-br ${colorClasses[color]} border transition-all duration-300 hover:scale-105 hover:shadow-lg h-fit`}>
+      <CardContent className="p-4">
         <div className="flex items-center justify-between">
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+          <div className="space-y-1">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
               {title}
             </p>
-            <p className="text-3xl font-bold tracking-tight">
+            <p className="text-2xl font-bold tracking-tight">
               {value}
             </p>
             {description && (
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs text-muted-foreground">
                 {description}
               </p>
             )}
             {trend && (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
                 <span className={`text-xs font-medium ${trend.isPositive ? 'text-success' : 'text-danger'}`}>
                   {trend.isPositive ? '↗' : '↘'} {Math.abs(trend.value)}%
                 </span>
@@ -56,8 +56,8 @@ const StatsCard = ({ title, value, icon: Icon, description, trend, color = 'defa
               </div>
             )}
           </div>
-          <div className={`p-3 rounded-xl bg-background/50 ${iconColorClasses[color]}`}>
-            <Icon className="w-6 h-6" />
+          <div className={`p-2 rounded-lg bg-background/50 ${iconColorClasses[color]}`}>
+            <Icon className="w-5 h-5" />
           </div>
         </div>
       </CardContent>

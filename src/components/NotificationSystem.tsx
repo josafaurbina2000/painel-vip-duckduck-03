@@ -46,7 +46,7 @@ const NotificationSystem = ({ vips }: NotificationSystemProps) => {
 
   if (expiringToday.length === 0 && expiringSoon.length === 0 && expiringThisWeek.length === 0) {
     return (
-      <Card className="bg-card/50 backdrop-blur-sm border-border h-full">
+      <Card className="bg-card/50 backdrop-blur-sm border-border h-full min-h-[300px]">
         <CardContent className="p-6 flex items-center justify-center h-full">
           <div className="text-center">
             <Bell className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
@@ -61,20 +61,22 @@ const NotificationSystem = ({ vips }: NotificationSystemProps) => {
     <div className="space-y-3 h-full">
       {/* Alerta crítico para VIPs expirando hoje */}
       {expiringToday.length > 0 && (
-        <Alert className="border-danger bg-danger/5 py-2">
-          <AlertTriangle className="h-4 w-4 text-danger" />
-          <AlertDescription className="flex items-center justify-between">
-            <span className="text-sm">
-              <strong className="text-danger">{expiringToday.length} VIP{expiringToday.length > 1 ? 's' : ''} expira{expiringToday.length === 1 ? '' : 'm'} hoje!</strong>
-            </span>
-            <Badge variant="destructive" className="text-xs">{expiringToday.length}</Badge>
-          </AlertDescription>
+        <Alert className="border-danger bg-danger/5 py-3">
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="h-4 w-4 text-danger flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <span className="text-sm font-medium text-danger">
+                {expiringToday.length} VIP{expiringToday.length > 1 ? 's' : ''} expira{expiringToday.length === 1 ? '' : 'm'} hoje!
+              </span>
+            </div>
+            <Badge variant="destructive" className="text-xs flex-shrink-0">{expiringToday.length}</Badge>
+          </div>
         </Alert>
       )}
 
-      {/* Card de notificações compacto e quadrado */}
-      <Card className="bg-card/50 backdrop-blur-sm border-warning/50 flex-1">
-        <CardHeader className="pb-2">
+      {/* Card de notificações */}
+      <Card className="bg-card/50 backdrop-blur-sm border-warning/50 flex-1 min-h-[250px]">
+        <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <Bell className="w-4 h-4 text-warning" />
             Centro de Notificações
@@ -85,7 +87,7 @@ const NotificationSystem = ({ vips }: NotificationSystemProps) => {
             )}
           </CardTitle>
         </CardHeader>
-        <CardContent className="pt-0 space-y-3 max-h-48 overflow-y-auto">
+        <CardContent className="pt-0 space-y-3">
           {/* VIPs expirando hoje */}
           {expiringToday.length > 0 && (
             <div className="space-y-2">
@@ -94,17 +96,12 @@ const NotificationSystem = ({ vips }: NotificationSystemProps) => {
                 Hoje ({expiringToday.length})
               </h4>
               <div className="space-y-1">
-                {expiringToday.slice(0, 3).map(vip => (
+                {expiringToday.map(vip => (
                   <div key={vip.id} className="flex items-center justify-between p-2 rounded bg-danger/5 border border-danger/20 text-xs">
                     <span className="font-medium truncate">{vip.playerName}</span>
                     <span className="text-danger ml-2">Hoje</span>
                   </div>
                 ))}
-                {expiringToday.length > 3 && (
-                  <p className="text-xs text-muted-foreground text-center">
-                    +{expiringToday.length - 3} mais
-                  </p>
-                )}
               </div>
             </div>
           )}
@@ -117,7 +114,7 @@ const NotificationSystem = ({ vips }: NotificationSystemProps) => {
                 Próximos 3 Dias ({expiringSoon.length})
               </h4>
               <div className="space-y-1">
-                {expiringSoon.slice(0, 2).map(vip => {
+                {expiringSoon.map(vip => {
                   const daysRemaining = calculateDaysRemaining(vip.endDate);
                   return (
                     <div key={vip.id} className="flex items-center justify-between p-2 rounded bg-warning/5 border border-warning/20 text-xs">
@@ -126,11 +123,6 @@ const NotificationSystem = ({ vips }: NotificationSystemProps) => {
                     </div>
                   );
                 })}
-                {expiringSoon.length > 2 && (
-                  <p className="text-xs text-muted-foreground text-center">
-                    +{expiringSoon.length - 2} mais
-                  </p>
-                )}
               </div>
             </div>
           )}
@@ -143,7 +135,7 @@ const NotificationSystem = ({ vips }: NotificationSystemProps) => {
                 Esta Semana ({expiringThisWeek.length})
               </h4>
               <div className="space-y-1">
-                {expiringThisWeek.slice(0, 2).map(vip => {
+                {expiringThisWeek.map(vip => {
                   const daysRemaining = calculateDaysRemaining(vip.endDate);
                   return (
                     <div key={vip.id} className="flex items-center justify-between p-2 rounded bg-muted/20 border border-muted text-xs">
@@ -152,11 +144,6 @@ const NotificationSystem = ({ vips }: NotificationSystemProps) => {
                     </div>
                   );
                 })}
-                {expiringThisWeek.length > 2 && (
-                  <p className="text-xs text-muted-foreground text-center">
-                    +{expiringThisWeek.length - 2} mais
-                  </p>
-                )}
               </div>
             </div>
           )}
