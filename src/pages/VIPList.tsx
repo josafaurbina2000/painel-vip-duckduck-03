@@ -1,18 +1,22 @@
 
 import { useState, useEffect } from "react";
-import { Search, Filter, Calendar, User } from "lucide-react";
+import { Search, Filter, Calendar, User, Trash2, Edit } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Link } from "react-router-dom";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Link, useNavigate } from "react-router-dom";
 import { VIP } from "@/types/vip";
 import { useVIP } from "@/contexts/VIPContext";
 import { calculateDaysRemaining, formatCurrency, formatDate, filterVIPs } from "@/utils/vipUtils";
+import { useToast } from "@/hooks/use-toast";
 import VIPBadge from "@/components/VIPBadge";
 
 const VIPList = () => {
-  const { vips } = useVIP();
+  const { vips, deleteVIP } = useVIP();
+  const { toast } = useToast();
+  const navigate = useNavigate();
   const [filteredVips, setFilteredVips] = useState<VIP[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -32,6 +36,18 @@ const VIPList = () => {
     const filtered = filterVIPs(vips, filters);
     setFilteredVips(filtered);
   }, [vips, searchTerm, statusFilter, expiringFilter]);
+
+  const handleDeleteVIP = (vip: VIP) => {
+    deleteVIP(vip.id);
+    toast({
+      title: "VIP removido",
+      description: `O VIP de ${vip.playerName} foi removido com sucesso.`,
+    });
+  };
+
+  const handleEditVIP = (vipId: string) => {
+    navigate(`/add-vip?edit=${vipId}`);
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -157,12 +173,52 @@ const VIPList = () => {
                     </div>
                   )}
 
-                  {/* Botão ver detalhes */}
-                  <Link to={`/vip/${vip.id}`} className="block">
-                    <Button variant="outline" className="w-full hover:bg-primary/10 hover:border-primary">
-                      Ver Detalhes
+                  {/* Botões de ação */}
+                  <div className="flex gap-2">
+                    <Link to={`/vip/${vip.id}`} className="flex-1">
+                      <Button variant="outline" className="w-full hover:bg-primary/10 hover:border-primary">
+                        Ver Detalhes
+                      </Button>
+                    </Link>
+                    
+                    <Button 
+                      variant="outline" 
+                      size="icon"
+                      onClick={() => handleEditVIP(vip.id)}
+                      className="hover:bg-primary/10 hover:border-primary"
+                    >
+                      <Edit className="w-4 h-4" />
                     </Button>
-                  </Link>
+
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          size="icon"
+                          className="hover:bg-danger/10 hover:border-danger text-danger"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Confirmar Remoção</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Tem certeza que deseja remover o VIP de {vip.playerName}? Esta ação não pode ser desfeita.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction 
+                            onClick={() => handleDeleteVIP(vip)} 
+                            className="bg-danger hover:bg-danger/90"
+                          >
+                            Remover
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
                 </div>
               </CardContent>
             </Card>

@@ -1,136 +1,138 @@
 
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Upload, Save } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Calendar, DollarSign, FileText, User, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
+import { Switch } from "@/components/ui/switch";
 import { useVIP } from "@/contexts/VIPContext";
+import { useToast } from "@/hooks/use-toast";
 
 const AddVIP = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const editId = searchParams.get('edit');
+  const { addVIP, updateVIP, getVIPById } = useVIP();
   const { toast } = useToast();
-  const { addVIP } = useVIP();
-  
+
   const [formData, setFormData] = useState({
     playerName: "",
-    startDate: "",
-    durationDays: "",
     amountPaid: "",
-    paymentProof: null as File | null,
-    observations: "",
-    isPermanent: false
+    startDate: new Date().toISOString().split('T')[0],
+    durationDays: "",
+    isPermanent: false,
+    paymentProof: "",
+    observations: ""
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleInputChange = (field: string, value: any) => {
+  // Carregar dados para edição
+  useEffect(() => {
+    if (editId) {
+      const vip = getVIPById(editId);
+      if (vip) {
+        setFormData({
+          playerName: vip.playerName,
+          amountPaid: vip.amountPaid.toString(),
+          startDate: new Date(vip.startDate).toISOString().split('T')[0],
+          durationDays: vip.durationDays.toString(),
+          isPermanent: vip.isPermanent,
+          paymentProof: vip.paymentProof || "",
+          observations: vip.observations || ""
+        });
+      }
+    }
+  }, [editId, getVIPById]);
+
+  const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // Validar tipo de arquivo
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
-      if (!allowedTypes.includes(file.type)) {
-        toast({
-          title: "Arquivo inválido",
-          description: "Por favor, selecione uma imagem (JPG, PNG, GIF) ou PDF.",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      // Validar tamanho (5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        toast({
-          title: "Arquivo muito grande",
-          description: "O arquivo deve ter no máximo 5MB.",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      setFormData(prev => ({ ...prev, paymentProof: file }));
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    setIsLoading(true);
 
     try {
-      // Validações
+      // Validações básicas
       if (!formData.playerName.trim()) {
-        throw new Error("Nome do jogador é obrigatório");
+        toast({
+          title: "Erro",
+          description: "Nome do jogador é obrigatório.",
+          variant: "destructive",
+        });
+        return;
       }
-      
-      if (!formData.startDate) {
-        throw new Error("Data de início é obrigatória");
-      }
-      
-      if (!formData.isPermanent && (!formData.durationDays || parseInt(formData.durationDays) <= 0)) {
-        throw new Error("Duração em dias é obrigatória para VIPs temporários");
-      }
-      
+
       if (!formData.amountPaid || parseFloat(formData.amountPaid) <= 0) {
-        throw new Error("Valor pago é obrigatório");
-      }
-      
-      if (!formData.paymentProof) {
-        throw new Error("Comprovante de pagamento é obrigatório");
+        toast({
+          title: "Erro",
+          description: "Valor pago deve ser maior que zero.",
+          variant: "destructive",
+        });
+        return;
       }
 
-      // Calcular data final
+      if (!formData.isPermanent && (!formData.durationDays || parseInt(formData.durationDays) <= 0)) {
+        toast({
+          title: "Erro",
+          description: "Duração em dias é obrigatória para VIPs temporários.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const startDate = new Date(formData.startDate);
-      const durationDays = formData.isPermanent ? 0 : parseInt(formData.durationDays);
       const endDate = formData.isPermanent 
-        ? new Date("2099-12-31") 
-        : new Date(startDate.getTime() + (durationDays * 24 * 60 * 60 * 1000));
+        ? new Date(startDate.getTime() + 365 * 24 * 60 * 60 * 1000) // 1 ano no futuro para permanentes
+        : new Date(startDate.getTime() + parseInt(formData.durationDays) * 24 * 60 * 60 * 1000);
 
-      // Criar objeto VIP
-      const newVIP = {
+      const vipData = {
         playerName: formData.playerName.trim(),
-        startDate,
-        durationDays,
-        endDate,
         amountPaid: parseFloat(formData.amountPaid),
-        paymentProof: formData.paymentProof.name, // Em um app real, faria upload do arquivo
-        createdAt: new Date(),
+        startDate,
+        endDate,
+        durationDays: formData.isPermanent ? 0 : parseInt(formData.durationDays),
+        isPermanent: formData.isPermanent,
+        paymentProof: formData.paymentProof.trim(),
         observations: formData.observations.trim(),
-        isPermanent: formData.isPermanent
+        createdAt: editId ? getVIPById(editId)?.createdAt || new Date() : new Date()
       };
 
-      // Adicionar VIP usando o contexto
-      addVIP(newVIP);
-
-      toast({
-        title: "VIP cadastrado com sucesso!",
-        description: `${formData.playerName} foi adicionado à lista de VIPs.`,
-      });
+      if (editId) {
+        updateVIP(editId, vipData);
+        toast({
+          title: "VIP atualizado!",
+          description: `O VIP de ${formData.playerName} foi atualizado com sucesso.`,
+        });
+      } else {
+        addVIP(vipData);
+        toast({
+          title: "VIP adicionado!",
+          description: `O VIP de ${formData.playerName} foi adicionado com sucesso.`,
+        });
+      }
 
       navigate("/vips");
     } catch (error) {
       toast({
-        title: "Erro ao cadastrar VIP",
-        description: error instanceof Error ? error.message : "Ocorreu um erro inesperado",
-        variant: "destructive"
+        title: "Erro",
+        description: "Ocorreu um erro ao salvar o VIP. Tente novamente.",
+        variant: "destructive",
       });
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
       {/* Header */}
       <div className="flex items-center gap-4">
         <Button 
@@ -142,180 +144,215 @@ const AddVIP = () => {
           <ArrowLeft className="w-4 h-4" />
         </Button>
         <div>
-          <h1 className="text-3xl font-bold">Adicionar VIP</h1>
+          <h1 className="text-3xl font-bold">
+            {editId ? 'Editar VIP' : 'Adicionar Novo VIP'}
+          </h1>
           <p className="text-muted-foreground">
-            Cadastrar novo jogador VIP no servidor
+            {editId ? 'Atualize as informações do VIP' : 'Preencha as informações do novo VIP'}
           </p>
         </div>
       </div>
 
-      {/* Formulário */}
-      <Card className="bg-card/50 backdrop-blur-sm border-border">
-        <CardHeader>
-          <CardTitle>Dados do VIP</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Nome do jogador */}
-              <div className="space-y-2">
-                <Label htmlFor="playerName">Nome do Jogador *</Label>
-                <Input
-                  id="playerName"
-                  placeholder="Ex: SnIpEr_BF4_PRO"
-                  value={formData.playerName}
-                  onChange={(e) => handleInputChange("playerName", e.target.value)}
-                  className="bg-background/50"
-                  required
-                />
-              </div>
-
-              {/* Data de início */}
-              <div className="space-y-2">
-                <Label htmlFor="startDate">Data de Início *</Label>
-                <Input
-                  id="startDate"
-                  type="date"
-                  value={formData.startDate}
-                  onChange={(e) => handleInputChange("startDate", e.target.value)}
-                  className="bg-background/50"
-                  required
-                />
-              </div>
-
-              {/* Duração em dias */}
-              <div className="space-y-2">
-                <Label htmlFor="durationDays">
-                  Duração (dias) {!formData.isPermanent && "*"}
-                </Label>
-                <Input
-                  id="durationDays"
-                  type="number"
-                  placeholder="Ex: 30"
-                  value={formData.durationDays}
-                  onChange={(e) => handleInputChange("durationDays", e.target.value)}
-                  className="bg-background/50"
-                  disabled={formData.isPermanent}
-                  required={!formData.isPermanent}
-                  min="1"
-                />
-              </div>
-
-              {/* Valor pago */}
-              <div className="space-y-2">
-                <Label htmlFor="amountPaid">Valor Pago (R$) *</Label>
-                <Input
-                  id="amountPaid"
-                  type="number"
-                  step="0.01"
-                  placeholder="Ex: 25.00"
-                  value={formData.amountPaid}
-                  onChange={(e) => handleInputChange("amountPaid", e.target.value)}
-                  className="bg-background/50"
-                  required
-                  min="0.01"
-                />
-              </div>
-            </div>
-
-            {/* VIP Permanente */}
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="isPermanent"
-                checked={formData.isPermanent}
-                onCheckedChange={(checked) => {
-                  handleInputChange("isPermanent", checked);
-                  if (checked) {
-                    handleInputChange("durationDays", "");
-                  }
-                }}
-              />
-              <Label htmlFor="isPermanent" className="text-sm font-medium">
-                VIP Permanente
-              </Label>
-            </div>
-
-            {/* Upload do comprovante */}
-            <div className="space-y-2">
-              <Label htmlFor="paymentProof">Comprovante de Pagamento *</Label>
-              <div className="border-2 border-dashed border-border rounded-lg p-6 bg-background/30">
-                <div className="text-center">
-                  <Upload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="paymentProof"
-                      className="cursor-pointer text-primary hover:text-primary/80 font-medium"
-                    >
-                      Clique para fazer upload
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      PNG, JPG, GIF ou PDF até 5MB
-                    </p>
-                  </div>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Informações do Jogador */}
+          <div className="lg:col-span-2 space-y-6">
+            <Card className="bg-card/50 backdrop-blur-sm border-border">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="w-5 h-5" />
+                  Informações do Jogador
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="playerName">Nome do Jogador *</Label>
                   <Input
-                    id="paymentProof"
-                    type="file"
-                    accept="image/*,application/pdf"
-                    onChange={handleFileChange}
-                    className="hidden"
+                    id="playerName"
+                    value={formData.playerName}
+                    onChange={(e) => handleInputChange("playerName", e.target.value)}
+                    placeholder="Digite o nome do jogador"
+                    className="bg-background/50"
                     required
                   />
                 </div>
-                {formData.paymentProof && (
-                  <div className="mt-4 p-3 bg-primary/10 border border-primary/20 rounded-lg">
-                    <p className="text-sm font-medium text-primary">
-                      Arquivo selecionado: {formData.paymentProof.name}
-                    </p>
+              </CardContent>
+            </Card>
+
+            {/* Informações do VIP */}
+            <Card className="bg-card/50 backdrop-blur-sm border-border">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Calendar className="w-5 h-5" />
+                  Configurações do VIP
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="startDate">Data de Início *</Label>
+                    <Input
+                      id="startDate"
+                      type="date"
+                      value={formData.startDate}
+                      onChange={(e) => handleInputChange("startDate", e.target.value)}
+                      className="bg-background/50"
+                      required
+                    />
                   </div>
-                )}
-              </div>
-            </div>
+
+                  {!formData.isPermanent && (
+                    <div>
+                      <Label htmlFor="durationDays">Duração (dias) *</Label>
+                      <Input
+                        id="durationDays"
+                        type="number"
+                        min="1"
+                        value={formData.durationDays}
+                        onChange={(e) => handleInputChange("durationDays", e.target.value)}
+                        placeholder="Ex: 30"
+                        className="bg-background/50"
+                        required={!formData.isPermanent}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="isPermanent"
+                    checked={formData.isPermanent}
+                    onCheckedChange={(checked) => handleInputChange("isPermanent", checked)}
+                  />
+                  <Label htmlFor="isPermanent" className="text-sm font-medium">
+                    VIP Permanente
+                  </Label>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Informações de Pagamento */}
+            <Card className="bg-card/50 backdrop-blur-sm border-border">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <DollarSign className="w-5 h-5" />
+                  Informações de Pagamento
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="amountPaid">Valor Pago (R$) *</Label>
+                  <Input
+                    id="amountPaid"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={formData.amountPaid}
+                    onChange={(e) => handleInputChange("amountPaid", e.target.value)}
+                    placeholder="0,00"
+                    className="bg-background/50"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="paymentProof">Comprovante de Pagamento</Label>
+                  <Textarea
+                    id="paymentProof"
+                    value={formData.paymentProof}
+                    onChange={(e) => handleInputChange("paymentProof", e.target.value)}
+                    placeholder="Cole aqui o link ou descrição do comprovante"
+                    className="bg-background/50"
+                    rows={3}
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Observações */}
-            <div className="space-y-2">
-              <Label htmlFor="observations">Observações</Label>
-              <Textarea
-                id="observations"
-                placeholder="Informações adicionais sobre o VIP (opcional)"
-                value={formData.observations}
-                onChange={(e) => handleInputChange("observations", e.target.value)}
-                className="bg-background/50 min-h-[100px]"
-                rows={4}
-              />
-            </div>
+            <Card className="bg-card/50 backdrop-blur-sm border-border">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="w-5 h-5" />
+                  Observações
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div>
+                  <Label htmlFor="observations">Observações Adicionais</Label>
+                  <Textarea
+                    id="observations"
+                    value={formData.observations}
+                    onChange={(e) => handleInputChange("observations", e.target.value)}
+                    placeholder="Adicione observações sobre este VIP..."
+                    className="bg-background/50"
+                    rows={4}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
 
-            {/* Botões */}
-            <div className="flex gap-4 pt-6">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate(-1)}
-                className="flex-1"
-                disabled={isSubmitting}
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="submit"
-                className="flex-1 bg-primary hover:bg-primary/90"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
-                    Salvando...
+          {/* Resumo */}
+          <div className="space-y-6">
+            <Card className="bg-card/50 backdrop-blur-sm border-border">
+              <CardHeader>
+                <CardTitle className="text-lg">Resumo</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Jogador</span>
+                    <span className="font-medium">{formData.playerName || "—"}</span>
                   </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <Save className="w-4 h-4" />
-                    Salvar VIP
+                  
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Valor</span>
+                    <span className="font-medium">
+                      {formData.amountPaid ? `R$ ${parseFloat(formData.amountPaid).toFixed(2)}` : "—"}
+                    </span>
                   </div>
-                )}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+                  
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Tipo</span>
+                    <span className="font-medium">
+                      {formData.isPermanent ? "Permanente" : "Temporário"}
+                    </span>
+                  </div>
+                  
+                  {!formData.isPermanent && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Duração</span>
+                      <span className="font-medium">
+                        {formData.durationDays ? `${formData.durationDays} dias` : "—"}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="pt-4 space-y-2">
+                  <Button
+                    type="submit"
+                    className="w-full bg-primary hover:bg-primary/90"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? "Salvando..." : editId ? "Atualizar VIP" : "Adicionar VIP"}
+                  </Button>
+                  
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => navigate("/vips")}
+                  >
+                    Cancelar
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </form>
     </div>
   );
 };

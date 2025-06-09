@@ -4,15 +4,18 @@ import { ArrowLeft, Edit, Trash2, Calendar, DollarSign, FileText, User, Crown, C
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useVIP } from "@/contexts/VIPContext";
 import { calculateDaysRemaining, formatCurrency, formatDate, formatDateTime } from "@/utils/vipUtils";
+import { useToast } from "@/hooks/use-toast";
 import VIPBadge from "@/components/VIPBadge";
 
 const VIPDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { getVIPById } = useVIP();
+  const { getVIPById, deleteVIP, updateVIP } = useVIP();
+  const { toast } = useToast();
   
   const vip = id ? getVIPById(id) : null;
 
@@ -43,6 +46,33 @@ const VIPDetails = () => {
 
   const daysRemaining = vip.isPermanent ? null : calculateDaysRemaining(vip.endDate);
 
+  const handleDeleteVIP = () => {
+    deleteVIP(vip.id);
+    toast({
+      title: "VIP removido",
+      description: `O VIP de ${vip.playerName} foi removido com sucesso.`,
+    });
+    navigate("/vips");
+  };
+
+  const handleExtendVIP = () => {
+    if (!vip.isPermanent) {
+      const newEndDate = new Date(vip.endDate);
+      newEndDate.setDate(newEndDate.getDate() + 30);
+      
+      updateVIP(vip.id, { endDate: newEndDate, durationDays: vip.durationDays + 30 });
+      
+      toast({
+        title: "VIP estendido",
+        description: `O VIP de ${vip.playerName} foi estendido por mais 30 dias.`,
+      });
+    }
+  };
+
+  const handleEditVIP = () => {
+    navigate(`/add-vip?edit=${vip.id}`);
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
@@ -66,7 +96,7 @@ const VIPDetails = () => {
         
         <div className="flex items-center gap-2">
           <VIPBadge status={vip.status} className="text-sm" />
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={handleEditVIP}>
             <Edit className="w-4 h-4 mr-2" />
             Editar
           </Button>
@@ -165,16 +195,30 @@ const VIPDetails = () => {
                   <DialogContent className="max-w-3xl bg-background border-border">
                     <DialogHeader>
                       <DialogTitle>Comprovante de Pagamento</DialogTitle>
+                      <DialogDescription>
+                        Comprovante de pagamento de {vip.playerName}
+                      </DialogDescription>
                     </DialogHeader>
                     <div className="p-4 bg-muted/30 rounded-lg min-h-[400px] flex items-center justify-center">
                       <div className="text-center">
                         <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                        <p className="text-muted-foreground">
-                          Visualização do comprovante de pagamento
+                        <p className="text-muted-foreground mb-2">
+                          Comprovante de Pagamento
                         </p>
-                        <p className="text-sm text-muted-foreground mt-2">
-                          {vip.paymentProof}
+                        <p className="text-sm text-muted-foreground">
+                          <strong>Jogador:</strong> {vip.playerName}
                         </p>
+                        <p className="text-sm text-muted-foreground">
+                          <strong>Valor:</strong> {formatCurrency(vip.amountPaid)}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          <strong>Data:</strong> {formatDate(vip.createdAt)}
+                        </p>
+                        {vip.paymentProof && (
+                          <p className="text-sm text-muted-foreground mt-2 p-2 bg-background rounded">
+                            {vip.paymentProof}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </DialogContent>
@@ -248,22 +292,40 @@ const VIPDetails = () => {
               <CardTitle className="text-lg">Ações</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button variant="outline" className="w-full justify-start">
+              <Button variant="outline" className="w-full justify-start" onClick={handleEditVIP}>
                 <Edit className="w-4 h-4 mr-2" />
                 Editar VIP
               </Button>
               
               {!vip.isPermanent && vip.status === 'active' && (
-                <Button variant="outline" className="w-full justify-start">
+                <Button variant="outline" className="w-full justify-start" onClick={handleExtendVIP}>
                   <Clock className="w-4 h-4 mr-2" />
-                  Estender Duração
+                  Estender Duração (+30 dias)
                 </Button>
               )}
               
-              <Button variant="outline" className="w-full justify-start text-danger border-danger/20 hover:bg-danger/10">
-                <Trash2 className="w-4 h-4 mr-2" />
-                Remover VIP
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start text-danger border-danger/20 hover:bg-danger/10">
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Remover VIP
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Confirmar Remoção</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Tem certeza que deseja remover o VIP de {vip.playerName}? Esta ação não pode ser desfeita.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDeleteVIP} className="bg-danger hover:bg-danger/90">
+                      Remover
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </CardContent>
           </Card>
         </div>
