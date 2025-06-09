@@ -1,5 +1,6 @@
 
 import { VIP, VIPStats } from "@/types/vip";
+import { startOfMonth, endOfMonth, isWithinInterval, subMonths } from "date-fns";
 
 export const calculateVIPStatus = (vip: VIP): 'active' | 'expired' | 'permanent' => {
   if (vip.isPermanent) return 'permanent';
@@ -44,12 +45,58 @@ export const formatDateTime = (date: Date): string => {
   }).format(new Date(date));
 };
 
+export const calculateMonthlyRevenue = (vips: VIP[]): number => {
+  const now = new Date();
+  const startOfCurrentMonth = startOfMonth(now);
+  const endOfCurrentMonth = endOfMonth(now);
+
+  return vips
+    .filter(vip => {
+      const createdAt = new Date(vip.createdAt);
+      return isWithinInterval(createdAt, {
+        start: startOfCurrentMonth,
+        end: endOfCurrentMonth
+      });
+    })
+    .reduce((total, vip) => total + vip.amountPaid, 0);
+};
+
+export const calculateMonthlyTrend = (vips: VIP[]): number => {
+  const now = new Date();
+  const currentMonth = calculateMonthlyRevenue(vips);
+  
+  const lastMonth = subMonths(now, 1);
+  const startOfLastMonth = startOfMonth(lastMonth);
+  const endOfLastMonth = endOfMonth(lastMonth);
+  
+  const lastMonthRevenue = vips
+    .filter(vip => {
+      const createdAt = new Date(vip.createdAt);
+      return isWithinInterval(createdAt, {
+        start: startOfLastMonth,
+        end: endOfLastMonth
+      });
+    })
+    .reduce((total, vip) => total + vip.amountPaid, 0);
+
+  if (lastMonthRevenue === 0) return currentMonth > 0 ? 100 : 0;
+  
+  return ((currentMonth - lastMonthRevenue) / lastMonthRevenue) * 100;
+};
+
 export const calculateStats = (vips: VIP[]): VIPStats => {
   const stats = vips.reduce((acc, vip) => {
     const status = calculateVIPStatus(vip);
     
     switch (status) {
       case 'active':
+        if (vip.isPermanent) {
+          acc.totalPermanent++;
+          acc.permanentRevenue += vip.amountPaid;
+        } else {
+          acc.totalTemporary++;
+          acc.temporaryRevenue += vip.amountPaid;
+        }
         acc.totalActive++;
         acc.totalRevenue += vip.amountPaid;
         break;
@@ -58,6 +105,7 @@ export const calculateStats = (vips: VIP[]): VIPStats => {
         break;
       case 'permanent':
         acc.totalPermanent++;
+        acc.permanentRevenue += vip.amountPaid;
         acc.totalRevenue += vip.amountPaid;
         break;
     }
@@ -67,8 +115,25 @@ export const calculateStats = (vips: VIP[]): VIPStats => {
     totalActive: 0,
     totalExpired: 0,
     totalPermanent: 0,
-    totalRevenue: 0
+    totalTemporary: 0,
+    totalRevenue: 0,
+    monthlyRevenue: 0,
+    permanentRevenue: 0,
+    temporaryRevenue: 0,
+    monthlyTrend: 0,
+    expiringInDays: 0
   });
+
+  // Calcular receita mensal
+  stats.monthlyRevenue = calculateMonthlyRevenue(vips);
+  stats.monthlyTrend = calculateMonthlyTrend(vips);
+
+  // Calcular VIPs expirando nos próximos 7 dias
+  stats.expiringInDays = vips.filter(vip => {
+    if (vip.isPermanent) return false;
+    const daysRemaining = calculateDaysRemaining(vip.endDate);
+    return daysRemaining > 0 && daysRemaining <= 7;
+  }).length;
 
   return stats;
 };
@@ -98,4 +163,32 @@ export const filterVIPs = (vips: VIP[], filters: { search?: string; status?: str
 
     return true;
   });
+};
+
+export const getMonthlyRevenueData = (vips: VIP[], months: number = 6) => {
+  const data = [];
+  const now = new Date();
+
+  for (let i = months - 1; i >= 0; i--) {
+    const monthDate = subMonths(now, i);
+    const startOfMonthDate = startOfMonth(monthDate);
+    const endOfMonthDate = endOfMonth(monthDate);
+
+    const monthRevenue = vips
+      .filter(vip => {
+        const createdAt = new Date(vip.createdAt);
+        return isWithinInterval(createdAt, {
+          start: startOfMonthDate,
+          end: endOfMonthDate
+        });
+      })
+      .reduce((total, vip) => total + vip.amountPaid, 0);
+
+    data.push({
+      month: monthDate.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }),
+      revenue: monthRevenue
+    });
+  }
+
+  return data;
 };

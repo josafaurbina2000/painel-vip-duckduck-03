@@ -24,7 +24,13 @@ export interface VIPStats {
   totalActive: number;
   totalExpired: number;
   totalPermanent: number;
+  totalTemporary: number;
   totalRevenue: number;
+  monthlyRevenue: number;
+  permanentRevenue: number;
+  temporaryRevenue: number;
+  monthlyTrend: number;
+  expiringInDays: number;
 }
 
 export interface VIPFilters {

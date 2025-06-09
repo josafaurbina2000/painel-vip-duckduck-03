@@ -1,14 +1,18 @@
 
-import { Users, DollarSign, Clock, Crown } from "lucide-react";
+import { Users, DollarSign, Clock, Crown, Calendar } from "lucide-react";
 import StatsCard from "@/components/StatsCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useVIP } from "@/contexts/VIPContext";
-import { calculateStats, calculateDaysRemaining, formatCurrency, formatDate } from "@/utils/vipUtils";
+import { calculateStats, calculateDaysRemaining, formatCurrency, formatDate, getMonthlyRevenueData } from "@/utils/vipUtils";
 import VIPBadge from "@/components/VIPBadge";
+import MonthlyRevenueChart from "@/components/MonthlyRevenueChart";
+import VIPTypeChart from "@/components/VIPTypeChart";
+import NotificationSystem from "@/components/NotificationSystem";
 
 const Dashboard = () => {
   const { vips } = useVIP();
   const stats = calculateStats(vips);
+  const monthlyRevenueData = getMonthlyRevenueData(vips);
 
   const expiringSoonVips = vips.filter(vip => {
     if (vip.isPermanent) return false;
@@ -22,21 +26,21 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* Sistema de Notificações */}
+      <NotificationSystem vips={vips} />
+
       {/* Cards de estatísticas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatsCard
-          title="VIPs Ativos"
-          value={stats.totalActive}
+          title="VIPs Temporários"
+          value={stats.totalTemporary}
           icon={Users}
-          description="Jogadores com VIP ativo"
+          description="VIPs temporários ativos"
           color="success"
-        />
-        <StatsCard
-          title="VIPs Expirados"
-          value={stats.totalExpired}
-          icon={Clock}
-          description="VIPs que expiraram"
-          color="danger"
+          trend={{
+            value: stats.monthlyTrend,
+            isPositive: stats.monthlyTrend >= 0
+          }}
         />
         <StatsCard
           title="VIPs Permanentes"
@@ -46,11 +50,34 @@ const Dashboard = () => {
           color="info"
         />
         <StatsCard
-          title="Receita Total"
-          value={formatCurrency(stats.totalRevenue)}
+          title="Receita Mensal"
+          value={formatCurrency(stats.monthlyRevenue)}
           icon={DollarSign}
-          description="De VIPs ativos e permanentes"
+          description="Receita do mês atual"
           color="warning"
+          trend={{
+            value: stats.monthlyTrend,
+            isPositive: stats.monthlyTrend >= 0
+          }}
+        />
+        <StatsCard
+          title="Expirando em 7 dias"
+          value={stats.expiringInDays}
+          icon={Clock}
+          description="VIPs temporários vencendo"
+          color="danger"
+        />
+      </div>
+
+      {/* Gráficos */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <MonthlyRevenueChart 
+          data={monthlyRevenueData} 
+          trend={stats.monthlyTrend}
+        />
+        <VIPTypeChart 
+          permanentCount={stats.totalPermanent}
+          temporaryCount={stats.totalTemporary}
         />
       </div>
 
@@ -59,14 +86,14 @@ const Dashboard = () => {
         <Card className="bg-card/50 backdrop-blur-sm border-border">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Clock className="w-5 h-5 text-warning" />
+              <Calendar className="w-5 h-5 text-warning" />
               VIPs Expirando em Breve
             </CardTitle>
           </CardHeader>
           <CardContent>
             {expiringSoonVips.length === 0 ? (
               <p className="text-muted-foreground text-sm">
-                Nenhum VIP expirando nos próximos 7 dias
+                Nenhum VIP temporário expirando nos próximos 7 dias
               </p>
             ) : (
               <div className="space-y-3">
@@ -87,6 +114,7 @@ const Dashboard = () => {
                         <p className="text-sm font-medium text-warning">
                           {formatDate(vip.endDate)}
                         </p>
+                        <VIPBadge status={vip.status} />
                       </div>
                     </div>
                   );
@@ -114,7 +142,7 @@ const Dashboard = () => {
                   <div>
                     <p className="font-medium">{vip.playerName}</p>
                     <p className="text-sm text-muted-foreground">
-                      {formatDate(vip.createdAt)}
+                      {formatDate(vip.createdAt)} • {vip.isPermanent ? 'Permanente' : 'Temporário'}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -125,6 +153,48 @@ const Dashboard = () => {
                   </div>
                 </div>
               ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Resumo Financeiro */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="bg-gradient-to-br from-success/20 to-success/5 border-success/20">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Receita VIPs Temporários</p>
+                <p className="text-2xl font-bold text-success">{formatCurrency(stats.temporaryRevenue)}</p>
+              </div>
+              <Users className="w-8 h-8 text-success" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-info/20 to-info/5 border-info/20">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Receita VIPs Permanentes</p>
+                <p className="text-2xl font-bold text-info">{formatCurrency(stats.permanentRevenue)}</p>
+              </div>
+              <Crown className="w-8 h-8 text-info" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-to-br from-primary/20 to-primary/5 border-primary/20">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Receita Total</p>
+                <p className="text-2xl font-bold text-primary">{formatCurrency(stats.totalRevenue)}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {stats.totalActive} VIPs ativos
+                </p>
+              </div>
+              <DollarSign className="w-8 h-8 text-primary" />
             </div>
           </CardContent>
         </Card>
