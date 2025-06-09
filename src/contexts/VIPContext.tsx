@@ -1,7 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { VIP } from '@/types/vip';
-import { mockVips } from '@/data/mockVips';
 import { calculateVIPStatus } from '@/utils/vipUtils';
 
 interface VIPContextType {
@@ -10,6 +9,7 @@ interface VIPContextType {
   updateVIP: (id: string, updates: Partial<VIP>) => void;
   deleteVIP: (id: string) => void;
   getVIPById: (id: string) => VIP | undefined;
+  clearAllData: () => void;
 }
 
 const VIPContext = createContext<VIPContextType | undefined>(undefined);
@@ -29,32 +29,38 @@ interface VIPProviderProps {
 export const VIPProvider: React.FC<VIPProviderProps> = ({ children }) => {
   const [vips, setVips] = useState<VIP[]>([]);
 
-  // Carregar dados do localStorage ou usar mock data
+  // Carregar dados do localStorage - SEM fallback para mock data
   useEffect(() => {
     const savedVips = localStorage.getItem('vips');
     if (savedVips) {
-      const parsedVips = JSON.parse(savedVips);
-      // Converter strings de data de volta para objetos Date e migrar dados antigos
-      const vipsWithDates = parsedVips.map((vip: any) => ({
-        ...vip,
-        startDate: new Date(vip.startDate),
-        endDate: new Date(vip.endDate),
-        createdAt: new Date(vip.createdAt),
-        // Remover propriedades de VIP permanente se existirem
-        isPermanent: undefined,
-        paymentProof: typeof vip.paymentProof === 'string' && vip.paymentProof 
-          ? null 
-          : vip.paymentProof
-      }));
-      setVips(vipsWithDates);
+      try {
+        const parsedVips = JSON.parse(savedVips);
+        // Converter strings de data de volta para objetos Date
+        const vipsWithDates = parsedVips.map((vip: any) => ({
+          ...vip,
+          startDate: new Date(vip.startDate),
+          endDate: new Date(vip.endDate),
+          createdAt: new Date(vip.createdAt),
+          // Limpar propriedades desnecessárias
+          isPermanent: undefined,
+          paymentProof: typeof vip.paymentProof === 'string' && vip.paymentProof 
+            ? null 
+            : vip.paymentProof
+        }));
+        setVips(vipsWithDates);
+      } catch (error) {
+        console.error('Erro ao carregar VIPs do localStorage:', error);
+        setVips([]);
+      }
     } else {
-      setVips(mockVips);
+      // Inicializar com array vazio - PRONTO PARA SUPABASE
+      setVips([]);
     }
   }, []);
 
   // Salvar no localStorage sempre que os VIPs mudarem
   useEffect(() => {
-    if (vips.length > 0) {
+    if (vips.length >= 0) { // Salvar mesmo quando array está vazio
       localStorage.setItem('vips', JSON.stringify(vips));
     }
   }, [vips]);
@@ -96,12 +102,20 @@ export const VIPProvider: React.FC<VIPProviderProps> = ({ children }) => {
     return vipsWithStatus.find(vip => vip.id === id);
   };
 
+  // Função para limpar todos os dados - PRONTA PARA RESET COMPLETO
+  const clearAllData = () => {
+    setVips([]);
+    localStorage.removeItem('vips');
+    console.log('Todos os dados foram limpos. Sistema pronto para Supabase.');
+  };
+
   const value: VIPContextType = {
     vips: getVipsWithCurrentStatus(),
     addVIP,
     updateVIP,
     deleteVIP,
-    getVIPById
+    getVIPById,
+    clearAllData
   };
 
   return (
