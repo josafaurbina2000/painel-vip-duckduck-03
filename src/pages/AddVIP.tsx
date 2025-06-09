@@ -10,6 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { useVIP } from "@/contexts/VIPContext";
 import { useToast } from "@/hooks/use-toast";
+import { VIPFile } from "@/types/vip";
+import FileUpload from "@/components/FileUpload";
 
 const AddVIP = () => {
   const navigate = useNavigate();
@@ -24,7 +26,7 @@ const AddVIP = () => {
     startDate: new Date().toISOString().split('T')[0],
     durationDays: "",
     isPermanent: false,
-    paymentProof: "",
+    paymentProof: null as VIPFile | null,
     observations: ""
   });
 
@@ -41,14 +43,14 @@ const AddVIP = () => {
           startDate: new Date(vip.startDate).toISOString().split('T')[0],
           durationDays: vip.durationDays.toString(),
           isPermanent: vip.isPermanent,
-          paymentProof: vip.paymentProof || "",
+          paymentProof: vip.paymentProof || null,
           observations: vip.observations || ""
         });
       }
     }
   }, [editId, getVIPById]);
 
-  const handleInputChange = (field: string, value: string | boolean) => {
+  const handleInputChange = (field: string, value: string | boolean | VIPFile | null) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -100,7 +102,7 @@ const AddVIP = () => {
         endDate,
         durationDays: formData.isPermanent ? 0 : parseInt(formData.durationDays),
         isPermanent: formData.isPermanent,
-        paymentProof: formData.paymentProof.trim(),
+        paymentProof: formData.paymentProof,
         observations: formData.observations.trim(),
         createdAt: editId ? getVIPById(editId)?.createdAt || new Date() : new Date()
       };
@@ -255,17 +257,10 @@ const AddVIP = () => {
                   />
                 </div>
 
-                <div>
-                  <Label htmlFor="paymentProof">Comprovante de Pagamento</Label>
-                  <Textarea
-                    id="paymentProof"
-                    value={formData.paymentProof}
-                    onChange={(e) => handleInputChange("paymentProof", e.target.value)}
-                    placeholder="Cole aqui o link ou descrição do comprovante"
-                    className="bg-background/50"
-                    rows={3}
-                  />
-                </div>
+                <FileUpload
+                  onFileSelect={(file) => handleInputChange("paymentProof", file)}
+                  currentFile={formData.paymentProof}
+                />
               </CardContent>
             </Card>
 
@@ -328,6 +323,13 @@ const AddVIP = () => {
                       </span>
                     </div>
                   )}
+
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Comprovante</span>
+                    <span className="font-medium">
+                      {formData.paymentProof ? "Anexado" : "—"}
+                    </span>
+                  </div>
                 </div>
 
                 <div className="pt-4 space-y-2">

@@ -1,4 +1,11 @@
 
+export interface VIPFile {
+  name: string;
+  type: string;
+  size: number;
+  data: string; // base64 encoded
+}
+
 export interface VIP {
   id: string;
   playerName: string;
@@ -6,7 +13,7 @@ export interface VIP {
   durationDays: number;
   endDate: Date;
   amountPaid: number;
-  paymentProof: string; // URL do arquivo
+  paymentProof?: VIPFile; // Changed from string to VIPFile
   createdAt: Date;
   observations?: string;
   isPermanent: boolean;

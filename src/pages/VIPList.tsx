@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Search, Filter, Calendar, User, Trash2, Edit } from "lucide-react";
+import { Search, Filter, Calendar, User, Trash2, Edit, Paperclip } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,6 +12,7 @@ import { useVIP } from "@/contexts/VIPContext";
 import { calculateDaysRemaining, formatCurrency, formatDate, filterVIPs } from "@/utils/vipUtils";
 import { useToast } from "@/hooks/use-toast";
 import VIPBadge from "@/components/VIPBadge";
+import FileViewer from "@/components/FileViewer";
 
 const VIPList = () => {
   const { vips, deleteVIP } = useVIP();
@@ -125,9 +126,14 @@ const VIPList = () => {
                       </div>
                       <div>
                         <h3 className="font-semibold text-lg">{vip.playerName}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Cadastrado em {formatDate(vip.createdAt)}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm text-muted-foreground">
+                            Cadastrado em {formatDate(vip.createdAt)}
+                          </p>
+                          {vip.paymentProof && (
+                            <Paperclip className="w-3 h-3 text-primary" title="Comprovante anexado" />
+                          )}
+                        </div>
                       </div>
                     </div>
                     <VIPBadge status={vip.status} />
@@ -162,6 +168,19 @@ const VIPList = () => {
                           <span className="text-danger font-medium">Expirado</span>
                         )}
                       </span>
+                    </div>
+                  )}
+
+                  {/* Comprovante (se houver) */}
+                  {vip.paymentProof && (
+                    <div className="p-3 bg-muted/30 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1">Comprovante</p>
+                          <p className="text-sm font-medium">{vip.paymentProof.name}</p>
+                        </div>
+                        <FileViewer file={vip.paymentProof} />
+                      </div>
                     </div>
                   )}
 
