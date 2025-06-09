@@ -1,4 +1,3 @@
-
 import { Badge } from "@/components/ui/badge";
 
 const Header = () => {
@@ -8,8 +7,12 @@ const Header = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/70 rounded-lg flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-lg">BF4</span>
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden">
+                <img 
+                  src="/lovable-uploads/a0e81e3e-a72b-4ec3-93b3-b0faf01fbf0e.png" 
+                  alt="BF4 VIP Panel Logo" 
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div>
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
