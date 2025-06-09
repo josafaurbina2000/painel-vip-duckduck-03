@@ -6,6 +6,7 @@ import { useVIP } from "@/contexts/VIPContext";
 import { calculateStats, calculateDaysRemaining, formatCurrency, formatDate } from "@/utils/vipUtils";
 import VIPBadge from "@/components/VIPBadge";
 import NotificationSystem from "@/components/NotificationSystem";
+
 const Dashboard = () => {
   const {
     vips
@@ -25,6 +26,7 @@ const Dashboard = () => {
     const daysRemaining = calculateDaysRemaining(vip.endDate);
     return daysRemaining === 7;
   });
+
   return <div className="space-y-6 animate-fade-in">
       {/* Cards principais no topo - Receita Total e Total de VIPs */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -131,7 +133,7 @@ const Dashboard = () => {
         </div>
 
         {/* Centro de Notificações ocupando 2 colunas */}
-        <div className="lg:col-span-2 h-full -my-12">
+        <div className="lg:col-span-2">
           <NotificationSystem vips={vips} />
         </div>
       </div>
@@ -205,4 +207,5 @@ const Dashboard = () => {
       </div>
     </div>;
 };
+
 export default Dashboard;

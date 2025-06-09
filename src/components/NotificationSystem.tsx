@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -7,9 +8,11 @@ import { Bell, Clock, AlertTriangle } from "lucide-react";
 import { VIP } from "@/types/vip";
 import { calculateDaysRemaining, formatDate } from "@/utils/vipUtils";
 import { useToast } from "@/hooks/use-toast";
+
 interface NotificationSystemProps {
   vips: VIP[];
 }
+
 const NotificationSystem = ({
   vips
 }: NotificationSystemProps) => {
@@ -45,6 +48,7 @@ const NotificationSystem = ({
       });
     }
   }, [expiringToday.length, toast]);
+
   if (expiringToday.length === 0 && expiringSoon.length === 0 && expiringThisWeek.length === 0) {
     return <Card className="bg-card/50 backdrop-blur-sm border-border h-[400px]">
         <CardContent className="p-6 flex items-center justify-center h-full">
@@ -55,32 +59,34 @@ const NotificationSystem = ({
         </CardContent>
       </Card>;
   }
-  return <div className="space-y-3 h-[400px] flex -my-14 my-0 py-[45px] mx-0 px-0">
-      {/* Alerta crítico para VIPs expirando hoje */}
-      {expiringToday.length > 0 && <Alert className="border-danger bg-danger/5 py-3 flex-shrink-0">
-          <div className="flex items-center gap-3">
-            <AlertTriangle className="h-4 w-4 text-danger flex-shrink-0" />
-            <div className="flex-1 min-w-0">
-              <span className="text-sm font-medium text-danger">
-                {expiringToday.length} VIP{expiringToday.length > 1 ? 's' : ''} expira{expiringToday.length === 1 ? '' : 'm'} hoje!
-              </span>
-            </div>
-            <Badge variant="destructive" className="text-xs flex-shrink-0">{expiringToday.length}</Badge>
-          </div>
-        </Alert>}
 
-      {/* Card de notificações com altura fixa e scroll */}
-      <Card className="bg-card/50 backdrop-blur-sm border-warning/50 flex-1 flex flex-col min-h-0">
-        <CardHeader className="pb-3 flex-shrink-0">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Bell className="w-4 h-4 text-warning" />
-            Centro de Notificações
-            {expiringSoon.length + expiringThisWeek.length + expiringToday.length > 0 && <Badge variant="secondary" className="bg-warning/20 text-warning text-xs">
-                {expiringSoon.length + expiringThisWeek.length + expiringToday.length}
-              </Badge>}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0 flex-1 min-h-0">
+  return <Card className="bg-card/50 backdrop-blur-sm border-warning/50 h-[400px] flex flex-col">
+      <CardHeader className="pb-3 flex-shrink-0">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <Bell className="w-4 h-4 text-warning" />
+          Centro de Notificações
+          {expiringSoon.length + expiringThisWeek.length + expiringToday.length > 0 && <Badge variant="secondary" className="bg-warning/20 text-warning text-xs">
+              {expiringSoon.length + expiringThisWeek.length + expiringToday.length}
+            </Badge>}
+        </CardTitle>
+      </CardHeader>
+      
+      <CardContent className="pt-0 flex-1 min-h-0 flex flex-col">
+        {/* Alerta crítico para VIPs expirando hoje - integrado no card */}
+        {expiringToday.length > 0 && <Alert className="border-danger bg-danger/5 py-3 flex-shrink-0 mb-4">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="h-4 w-4 text-danger flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <span className="text-sm font-medium text-danger">
+                  {expiringToday.length} VIP{expiringToday.length > 1 ? 's' : ''} expira{expiringToday.length === 1 ? '' : 'm'} hoje!
+                </span>
+              </div>
+              <Badge variant="destructive" className="text-xs flex-shrink-0">{expiringToday.length}</Badge>
+            </div>
+          </Alert>}
+
+        {/* Lista de notificações com scroll */}
+        <div className="flex-1 min-h-0">
           <ScrollArea className="h-full pr-4">
             <div className="space-y-3">
               {/* VIPs expirando hoje */}
@@ -132,8 +138,9 @@ const NotificationSystem = ({
                 </div>}
             </div>
           </ScrollArea>
-        </CardContent>
-      </Card>
-    </div>;
+        </div>
+      </CardContent>
+    </Card>;
 };
+
 export default NotificationSystem;
