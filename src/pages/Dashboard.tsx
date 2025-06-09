@@ -22,43 +22,70 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Sistema de Notificações - mais compacto */}
-      <NotificationSystem vips={vips} />
+      {/* Cards principais no topo - Receita Total e Total de VIPs */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="bg-gradient-to-br from-success/20 to-success/5 border-success/20">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Receita Total</p>
+                <p className="text-3xl font-bold text-success">{formatCurrency(stats.totalRevenue)}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  De todos os VIPs ativos
+                </p>
+              </div>
+              <DollarSign className="w-10 h-10 text-success" />
+            </div>
+          </CardContent>
+        </Card>
 
-      {/* Cards de estatísticas em linha */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <StatsCard
-          title="VIPs Ativos"
-          value={stats.totalActive}
-          icon={Users}
-          description="VIPs temporários ativos"
-          color="success"
-          trend={{
-            value: stats.monthlyTrend,
-            isPositive: stats.monthlyTrend >= 0
-          }}
-        />
-        <StatsCard
-          title="Receita Mensal"
-          value={formatCurrency(stats.monthlyRevenue)}
-          icon={DollarSign}
-          description="Receita do mês atual"
-          color="warning"
-          trend={{
-            value: stats.monthlyTrend,
-            isPositive: stats.monthlyTrend >= 0
-          }}
-        />
-        <StatsCard
-          title="Expirando em 7 dias"
-          value={stats.expiringInDays}
-          icon={Clock}
-          description="VIPs vencendo em breve"
-          color="danger"
-        />
+        <Card className="bg-gradient-to-br from-primary/20 to-primary/5 border-primary/20">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total de VIPs</p>
+                <p className="text-3xl font-bold text-primary">{stats.totalActive + stats.totalExpired}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {stats.totalActive} ativos • {stats.totalExpired} expirados
+                </p>
+              </div>
+              <Users className="w-10 h-10 text-primary" />
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Grid principal com 3 colunas */}
+      {/* Segunda linha - Stats cards e Centro de Notificações */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Stats cards ocupando 2 colunas */}
+        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <StatsCard
+            title="VIPs Ativos"
+            value={stats.totalActive}
+            icon={Users}
+            description="VIPs temporários ativos"
+            color="success"
+            trend={{
+              value: stats.monthlyTrend,
+              isPositive: stats.monthlyTrend >= 0
+            }}
+          />
+          <StatsCard
+            title="Expirando em 7 dias"
+            value={stats.expiringInDays}
+            icon={Clock}
+            description="VIPs vencendo em breve"
+            color="danger"
+          />
+        </div>
+
+        {/* Centro de Notificações ocupando 2 colunas com aspecto mais quadrado */}
+        <div className="lg:col-span-2">
+          <NotificationSystem vips={vips} />
+        </div>
+      </div>
+
+      {/* Grid principal com VIPs expirando e VIPs recentes */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* VIPs expirando em breve */}
         <Card className="bg-card/50 backdrop-blur-sm border-border">
@@ -131,39 +158,6 @@ const Dashboard = () => {
                   </div>
                 </div>
               ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Resumo Financeiro - 2 colunas maiores */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="bg-gradient-to-br from-success/20 to-success/5 border-success/20">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Receita Total</p>
-                <p className="text-3xl font-bold text-success">{formatCurrency(stats.totalRevenue)}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  De todos os VIPs ativos
-                </p>
-              </div>
-              <DollarSign className="w-10 h-10 text-success" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-primary/20 to-primary/5 border-primary/20">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total de VIPs</p>
-                <p className="text-3xl font-bold text-primary">{stats.totalActive + stats.totalExpired}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {stats.totalActive} ativos • {stats.totalExpired} expirados
-                </p>
-              </div>
-              <Users className="w-10 h-10 text-primary" />
             </div>
           </CardContent>
         </Card>
