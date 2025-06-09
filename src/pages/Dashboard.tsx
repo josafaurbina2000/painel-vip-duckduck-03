@@ -1,4 +1,3 @@
-
 import { Users, DollarSign, Clock, Calendar } from "lucide-react";
 import StatsCard from "@/components/StatsCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,19 +6,16 @@ import { useVIP } from "@/contexts/VIPContext";
 import { calculateStats, calculateDaysRemaining, formatCurrency, formatDate } from "@/utils/vipUtils";
 import VIPBadge from "@/components/VIPBadge";
 import NotificationSystem from "@/components/NotificationSystem";
-
 const Dashboard = () => {
-  const { vips } = useVIP();
+  const {
+    vips
+  } = useVIP();
   const stats = calculateStats(vips);
-
   const expiringSoonVips = vips.filter(vip => {
     const daysRemaining = calculateDaysRemaining(vip.endDate);
     return daysRemaining > 0 && daysRemaining <= 7;
   });
-
-  const recentVips = vips
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 8);
+  const recentVips = vips.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 8);
 
   // VIPs ativos
   const activeVips = vips.filter(vip => vip.status === 'active');
@@ -29,9 +25,7 @@ const Dashboard = () => {
     const daysRemaining = calculateDaysRemaining(vip.endDate);
     return daysRemaining === 7;
   });
-
-  return (
-    <div className="space-y-6 animate-fade-in">
+  return <div className="space-y-6 animate-fade-in">
       {/* Cards principais no topo - Receita Total e Total de VIPs */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="bg-gradient-to-br from-success/20 to-success/5 border-success/20">
@@ -90,21 +84,12 @@ const Dashboard = () => {
               <div className="flex-1 min-h-0">
                 <ScrollArea className="h-full pr-2">
                   <div className="space-y-2">
-                    {activeVips.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">Nenhum VIP ativo</p>
-                    ) : (
-                      activeVips.map((vip) => (
-                        <div
-                          key={vip.id}
-                          className="p-2 rounded bg-background/30 border border-success/10"
-                        >
+                    {activeVips.length === 0 ? <p className="text-xs text-muted-foreground">Nenhum VIP ativo</p> : activeVips.map(vip => <div key={vip.id} className="p-2 rounded bg-background/30 border border-success/10">
                           <p className="text-xs font-medium truncate">{vip.playerName}</p>
                           <p className="text-xs text-muted-foreground">
                             {calculateDaysRemaining(vip.endDate)} dias restantes
                           </p>
-                        </div>
-                      ))
-                    )}
+                        </div>)}
                   </div>
                 </ScrollArea>
               </div>
@@ -131,21 +116,12 @@ const Dashboard = () => {
               <div className="flex-1 min-h-0">
                 <ScrollArea className="h-full pr-2">
                   <div className="space-y-2">
-                    {expiring7Days.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">Nenhum VIP expirando em 7 dias</p>
-                    ) : (
-                      expiring7Days.map((vip) => (
-                        <div
-                          key={vip.id}
-                          className="p-2 rounded bg-background/30 border border-danger/10"
-                        >
+                    {expiring7Days.length === 0 ? <p className="text-xs text-muted-foreground">Nenhum VIP expirando em 7 dias</p> : expiring7Days.map(vip => <div key={vip.id} className="p-2 rounded bg-background/30 border border-danger/10">
                           <p className="text-xs font-medium truncate">{vip.playerName}</p>
                           <p className="text-xs text-muted-foreground">
                             Expira em {formatDate(vip.endDate)}
                           </p>
-                        </div>
-                      ))
-                    )}
+                        </div>)}
                   </div>
                 </ScrollArea>
               </div>
@@ -155,7 +131,7 @@ const Dashboard = () => {
         </div>
 
         {/* Centro de Notificações ocupando 2 colunas */}
-        <div className="lg:col-span-2 h-full">
+        <div className="lg:col-span-2 h-full -my-12">
           <NotificationSystem vips={vips} />
         </div>
       </div>
@@ -171,20 +147,13 @@ const Dashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {expiringSoonVips.length === 0 ? (
-              <p className="text-muted-foreground text-sm">
+            {expiringSoonVips.length === 0 ? <p className="text-muted-foreground text-sm">
                 Nenhum VIP expirando nos próximos 7 dias
-              </p>
-            ) : (
-              <ScrollArea className="h-80">
+              </p> : <ScrollArea className="h-80">
                 <div className="space-y-3">
-                  {expiringSoonVips.map((vip) => {
-                    const daysRemaining = calculateDaysRemaining(vip.endDate);
-                    return (
-                      <div
-                        key={vip.id}
-                        className="flex items-center justify-between p-3 rounded-lg bg-warning/5 border border-warning/20"
-                      >
+                  {expiringSoonVips.map(vip => {
+                const daysRemaining = calculateDaysRemaining(vip.endDate);
+                return <div key={vip.id} className="flex items-center justify-between p-3 rounded-lg bg-warning/5 border border-warning/20">
                         <div className="min-w-0 flex-1">
                           <p className="font-medium truncate">{vip.playerName}</p>
                           <p className="text-sm text-muted-foreground">
@@ -197,12 +166,10 @@ const Dashboard = () => {
                           </p>
                           <VIPBadge status={vip.status} />
                         </div>
-                      </div>
-                    );
-                  })}
+                      </div>;
+              })}
                 </div>
-              </ScrollArea>
-            )}
+              </ScrollArea>}
           </CardContent>
         </Card>
 
@@ -217,11 +184,7 @@ const Dashboard = () => {
           <CardContent>
             <ScrollArea className="h-80">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {recentVips.map((vip) => (
-                  <div
-                    key={vip.id}
-                    className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
-                  >
+                {recentVips.map(vip => <div key={vip.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
                     <div className="min-w-0 flex-1">
                       <p className="font-medium truncate">{vip.playerName}</p>
                       <p className="text-sm text-muted-foreground">
@@ -234,15 +197,12 @@ const Dashboard = () => {
                       </span>
                       <VIPBadge status={vip.status} />
                     </div>
-                  </div>
-                ))}
+                  </div>)}
               </div>
             </ScrollArea>
           </CardContent>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Dashboard;
