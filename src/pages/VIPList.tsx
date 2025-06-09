@@ -17,7 +17,7 @@ const VIPList = () => {
   const [filteredVips, setFilteredVips] = useState<VIP[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [expiringFilter, setExpiringFilter] = useState("");
+  const [expiringFilter, setExpiringFilter] = useState("todos");
 
   useEffect(() => {
     const vipData = getVipsWithCurrentStatus();
@@ -29,7 +29,7 @@ const VIPList = () => {
     const filters = {
       search: searchTerm,
       status: statusFilter,
-      expiringInDays: expiringFilter ? parseInt(expiringFilter) : undefined
+      expiringInDays: expiringFilter !== "todos" ? parseInt(expiringFilter) : undefined
     };
 
     const filtered = filterVIPs(vips, filters);
@@ -72,7 +72,7 @@ const VIPList = () => {
                   <SelectValue placeholder="Vencimento" />
                 </SelectTrigger>
                 <SelectContent className="bg-background border-border">
-                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="todos">Todos</SelectItem>
                   <SelectItem value="5">Próximos 5 dias</SelectItem>
                   <SelectItem value="10">Próximos 10 dias</SelectItem>
                   <SelectItem value="15">Próximos 15 dias</SelectItem>
