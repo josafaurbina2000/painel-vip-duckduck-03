@@ -1,4 +1,3 @@
-
 import { Users, DollarSign, Clock, Calendar } from "lucide-react";
 import StatsCard from "@/components/StatsCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -56,9 +55,9 @@ const Dashboard = () => {
       </div>
 
       {/* Segunda linha - Stats cards compactos e Centro de Notificações */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[400px]">
         {/* Stats cards ocupando 2 colunas */}
-        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
           <StatsCard
             title="VIPs Ativos"
             value={stats.totalActive}
@@ -80,7 +79,7 @@ const Dashboard = () => {
         </div>
 
         {/* Centro de Notificações ocupando 2 colunas */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 h-full">
           <NotificationSystem vips={vips} />
         </div>
       </div>

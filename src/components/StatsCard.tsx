@@ -32,8 +32,8 @@ const StatsCard = ({ title, value, icon: Icon, description, trend, color = 'defa
   };
 
   return (
-    <Card className={`relative overflow-hidden bg-gradient-to-br ${colorClasses[color]} border transition-all duration-300 hover:scale-105 hover:shadow-lg h-fit`}>
-      <CardContent className="p-4">
+    <Card className={`relative overflow-hidden bg-gradient-to-br ${colorClasses[color]} border transition-all duration-300 hover:scale-105 hover:shadow-lg h-full`}>
+      <CardContent className="p-4 h-full flex flex-col justify-between">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
@@ -47,7 +47,7 @@ const StatsCard = ({ title, value, icon: Icon, description, trend, color = 'defa
                 {description}
               </p>
             )}
-            {trend && (
+            {trend && trend.value !== 0 && (
               <div className="flex items-center gap-1">
                 <span className={`text-xs font-medium ${trend.isPositive ? 'text-success' : 'text-danger'}`}>
                   {trend.isPositive ? '↗' : '↘'} {Math.abs(trend.value)}%
