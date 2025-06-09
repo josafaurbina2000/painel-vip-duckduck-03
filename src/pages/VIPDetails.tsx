@@ -1,36 +1,20 @@
 
-import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Edit, Trash2, Calendar, DollarSign, FileText, User, Crown, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { VIP } from "@/types/vip";
-import { getVipsWithCurrentStatus } from "@/data/mockVips";
+import { useVIP } from "@/contexts/VIPContext";
 import { calculateDaysRemaining, formatCurrency, formatDate, formatDateTime } from "@/utils/vipUtils";
 import VIPBadge from "@/components/VIPBadge";
 
 const VIPDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [vip, setVip] = useState<VIP | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const vips = getVipsWithCurrentStatus();
-    const foundVip = vips.find(v => v.id === id);
-    setVip(foundVip || null);
-    setLoading(false);
-  }, [id]);
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+  const { getVIPById } = useVIP();
+  
+  const vip = id ? getVIPById(id) : null;
 
   if (!vip) {
     return (

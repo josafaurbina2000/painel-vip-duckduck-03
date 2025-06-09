@@ -1,27 +1,14 @@
 
-import { useState, useEffect } from "react";
 import { Users, DollarSign, Clock, Crown } from "lucide-react";
 import StatsCard from "@/components/StatsCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { VIP, VIPStats } from "@/types/vip";
-import { getVipsWithCurrentStatus } from "@/data/mockVips";
+import { useVIP } from "@/contexts/VIPContext";
 import { calculateStats, calculateDaysRemaining, formatCurrency, formatDate } from "@/utils/vipUtils";
 import VIPBadge from "@/components/VIPBadge";
 
 const Dashboard = () => {
-  const [vips, setVips] = useState<VIP[]>([]);
-  const [stats, setStats] = useState<VIPStats>({
-    totalActive: 0,
-    totalExpired: 0,
-    totalPermanent: 0,
-    totalRevenue: 0
-  });
-
-  useEffect(() => {
-    const vipData = getVipsWithCurrentStatus();
-    setVips(vipData);
-    setStats(calculateStats(vipData));
-  }, []);
+  const { vips } = useVIP();
+  const stats = calculateStats(vips);
 
   const expiringSoonVips = vips.filter(vip => {
     if (vip.isPermanent) return false;

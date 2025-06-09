@@ -9,10 +9,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { useVIP } from "@/contexts/VIPContext";
 
 const AddVIP = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { addVIP } = useVIP();
   
   const [formData, setFormData] = useState({
     playerName: "",
@@ -87,13 +89,28 @@ const AddVIP = () => {
         throw new Error("Comprovante de pagamento é obrigatório");
       }
 
-      // Simular salvamento (em um app real, seria uma chamada para API)
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Calcular data final
+      const startDate = new Date(formData.startDate);
+      const durationDays = formData.isPermanent ? 0 : parseInt(formData.durationDays);
+      const endDate = formData.isPermanent 
+        ? new Date("2099-12-31") 
+        : new Date(startDate.getTime() + (durationDays * 24 * 60 * 60 * 1000));
 
-      console.log("Dados do VIP:", {
-        ...formData,
-        paymentProof: formData.paymentProof?.name
-      });
+      // Criar objeto VIP
+      const newVIP = {
+        playerName: formData.playerName.trim(),
+        startDate,
+        durationDays,
+        endDate,
+        amountPaid: parseFloat(formData.amountPaid),
+        paymentProof: formData.paymentProof.name, // Em um app real, faria upload do arquivo
+        createdAt: new Date(),
+        observations: formData.observations.trim(),
+        isPermanent: formData.isPermanent
+      };
+
+      // Adicionar VIP usando o contexto
+      addVIP(newVIP);
 
       toast({
         title: "VIP cadastrado com sucesso!",

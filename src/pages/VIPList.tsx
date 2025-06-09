@@ -5,25 +5,22 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { VIP } from "@/types/vip";
-import { getVipsWithCurrentStatus } from "@/data/mockVips";
+import { useVIP } from "@/contexts/VIPContext";
 import { calculateDaysRemaining, formatCurrency, formatDate, filterVIPs } from "@/utils/vipUtils";
 import VIPBadge from "@/components/VIPBadge";
 
 const VIPList = () => {
-  const [vips, setVips] = useState<VIP[]>([]);
+  const { vips } = useVIP();
   const [filteredVips, setFilteredVips] = useState<VIP[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [expiringFilter, setExpiringFilter] = useState("todos");
 
   useEffect(() => {
-    const vipData = getVipsWithCurrentStatus();
-    setVips(vipData);
-    setFilteredVips(vipData);
-  }, []);
+    setFilteredVips(vips);
+  }, [vips]);
 
   useEffect(() => {
     const filters = {
