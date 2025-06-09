@@ -9,9 +9,7 @@ const Header = () => {
                 <img alt="BF4 VIP Panel Logo" className="w-full h-full object-cover" src="/lovable-uploads/174ee1fd-49bf-40c5-9a69-c78c6aa39044.png" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                  Painel VIP
-                </h1>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Painel VIP - DUCK DUCK</h1>
                 <p className="text-sm text-muted-foreground">
                   Gerenciamento de VIPs - Battlefield 4
                 </p>
