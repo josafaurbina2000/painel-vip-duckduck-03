@@ -66,12 +66,12 @@ const Dashboard = () => {
       </div>
 
       {/* Segunda linha - Cards customizados e Centro de Notificações */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[400px]">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Cards customizados ocupando 2 colunas */}
-        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
+        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
           
           {/* Card VIPs Ativos com lista de nomes */}
-          <Card className="relative overflow-hidden bg-gradient-to-br from-success/20 to-success/5 border-success/20 border transition-all duration-300 hover:scale-105 hover:shadow-lg h-full">
+          <Card className="relative overflow-hidden bg-gradient-to-br from-success/20 to-success/5 border-success/20 border transition-all duration-300 hover:scale-105 hover:shadow-lg h-80">
             <CardContent className="p-4 h-full flex flex-col">
               <div className="flex items-center justify-between mb-3">
                 <div>
@@ -88,8 +88,8 @@ const Dashboard = () => {
               </div>
               
               <div className="flex-1 min-h-0">
-                <ScrollArea className="h-full">
-                  <div className="space-y-1">
+                <ScrollArea className="h-full pr-2">
+                  <div className="space-y-2">
                     {activeVips.length === 0 ? (
                       <p className="text-xs text-muted-foreground">Nenhum VIP ativo</p>
                     ) : (
@@ -112,7 +112,7 @@ const Dashboard = () => {
           </Card>
 
           {/* Card Expirando em 7 dias com lista de nomes */}
-          <Card className="relative overflow-hidden bg-gradient-to-br from-danger/20 to-danger/5 border-danger/20 border transition-all duration-300 hover:scale-105 hover:shadow-lg h-full">
+          <Card className="relative overflow-hidden bg-gradient-to-br from-danger/20 to-danger/5 border-danger/20 border transition-all duration-300 hover:scale-105 hover:shadow-lg h-80">
             <CardContent className="p-4 h-full flex flex-col">
               <div className="flex items-center justify-between mb-3">
                 <div>
@@ -129,8 +129,8 @@ const Dashboard = () => {
               </div>
               
               <div className="flex-1 min-h-0">
-                <ScrollArea className="h-full">
-                  <div className="space-y-1">
+                <ScrollArea className="h-full pr-2">
+                  <div className="space-y-2">
                     {expiring7Days.length === 0 ? (
                       <p className="text-xs text-muted-foreground">Nenhum VIP expirando em 7 dias</p>
                     ) : (
