@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -8,11 +7,9 @@ import { Bell, Clock, AlertTriangle } from "lucide-react";
 import { VIP } from "@/types/vip";
 import { calculateDaysRemaining, formatDate } from "@/utils/vipUtils";
 import { useToast } from "@/hooks/use-toast";
-
 interface NotificationSystemProps {
   vips: VIP[];
 }
-
 const NotificationSystem = ({
   vips
 }: NotificationSystemProps) => {
@@ -48,7 +45,6 @@ const NotificationSystem = ({
       });
     }
   }, [expiringToday.length, toast]);
-
   if (expiringToday.length === 0 && expiringSoon.length === 0 && expiringThisWeek.length === 0) {
     return <Card className="bg-card/50 backdrop-blur-sm border-border h-[400px]">
         <CardContent className="p-6 flex items-center justify-center h-full">
@@ -59,8 +55,7 @@ const NotificationSystem = ({
         </CardContent>
       </Card>;
   }
-
-  return <Card className="bg-card/50 backdrop-blur-sm border-warning/50 h-[400px] flex flex-col">
+  return <Card className="bg-card/50 backdrop-blur-sm border-warning/50 h-[320px] flex flex-col py-0. py-0 px-0 mx-[2px] my-px">
       <CardHeader className="pb-3 flex-shrink-0">
         <CardTitle className="flex items-center gap-2 text-base">
           <Bell className="w-4 h-4 text-warning" />
@@ -71,7 +66,7 @@ const NotificationSystem = ({
         </CardTitle>
       </CardHeader>
       
-      <CardContent className="pt-0 flex-1 min-h-0 flex flex-col">
+      <CardContent className="pt-0 flex-1 min-h-0 flex flex-col my-0 py-[11px]">
         {/* Alerta crítico para VIPs expirando hoje - integrado no card */}
         {expiringToday.length > 0 && <Alert className="border-danger bg-danger/5 py-3 flex-shrink-0 mb-4">
             <div className="flex items-center gap-3">
@@ -142,5 +137,4 @@ const NotificationSystem = ({
       </CardContent>
     </Card>;
 };
-
 export default NotificationSystem;
