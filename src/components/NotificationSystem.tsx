@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -48,10 +49,10 @@ const NotificationSystem = ({ vips }: NotificationSystemProps) => {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Alerta crítico para VIPs expirando hoje */}
       {expiringToday.length > 0 && (
-        <Alert className="border-danger bg-danger/5">
+        <Alert className="border-danger bg-danger/5 py-3">
           <AlertTriangle className="h-4 w-4 text-danger" />
           <AlertDescription className="flex items-center justify-between">
             <span>
@@ -63,75 +64,81 @@ const NotificationSystem = ({ vips }: NotificationSystemProps) => {
         </Alert>
       )}
 
-      {/* Card de notificações detalhadas */}
+      {/* Card de notificações compacto */}
       <Card className="bg-card/50 backdrop-blur-sm border-warning/50">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Bell className="w-5 h-5 text-warning" />
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Bell className="w-4 h-4 text-warning" />
             Centro de Notificações
             {(expiringSoon.length + expiringThisWeek.length + expiringToday.length) > 0 && (
-              <Badge variant="secondary" className="bg-warning/20 text-warning">
+              <Badge variant="secondary" className="bg-warning/20 text-warning text-xs">
                 {expiringSoon.length + expiringThisWeek.length + expiringToday.length}
               </Badge>
             )}
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="pt-0 space-y-3">
           {/* VIPs expirando hoje */}
           {expiringToday.length > 0 && (
             <div className="space-y-2">
-              <h4 className="font-medium text-danger flex items-center gap-2">
-                <Clock className="w-4 h-4" />
+              <h4 className="font-medium text-danger flex items-center gap-2 text-sm">
+                <Clock className="w-3 h-3" />
                 Expirando Hoje ({expiringToday.length})
               </h4>
-              {expiringToday.map(vip => (
-                <div key={vip.id} className="flex items-center justify-between p-2 rounded bg-danger/5 border border-danger/20">
-                  <span className="font-medium">{vip.playerName}</span>
-                  <span className="text-xs text-danger">Hoje</span>
-                </div>
-              ))}
+              <div className="grid grid-cols-2 gap-2">
+                {expiringToday.map(vip => (
+                  <div key={vip.id} className="flex items-center justify-between p-2 rounded bg-danger/5 border border-danger/20 text-xs">
+                    <span className="font-medium truncate">{vip.playerName}</span>
+                    <span className="text-danger ml-2">Hoje</span>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
           {/* VIPs expirando em 1-3 dias */}
           {expiringSoon.length > 0 && (
             <div className="space-y-2">
-              <h4 className="font-medium text-warning flex items-center gap-2">
-                <Clock className="w-4 h-4" />
+              <h4 className="font-medium text-warning flex items-center gap-2 text-sm">
+                <Clock className="w-3 h-3" />
                 Próximos 3 Dias ({expiringSoon.length})
               </h4>
-              {expiringSoon.map(vip => {
-                const daysRemaining = calculateDaysRemaining(vip.endDate);
-                return (
-                  <div key={vip.id} className="flex items-center justify-between p-2 rounded bg-warning/5 border border-warning/20">
-                    <span className="font-medium">{vip.playerName}</span>
-                    <span className="text-xs text-warning">
-                      {daysRemaining} {daysRemaining === 1 ? 'dia' : 'dias'}
-                    </span>
-                  </div>
-                );
-              })}
+              <div className="grid grid-cols-2 gap-2">
+                {expiringSoon.map(vip => {
+                  const daysRemaining = calculateDaysRemaining(vip.endDate);
+                  return (
+                    <div key={vip.id} className="flex items-center justify-between p-2 rounded bg-warning/5 border border-warning/20 text-xs">
+                      <span className="font-medium truncate">{vip.playerName}</span>
+                      <span className="text-warning ml-2">
+                        {daysRemaining}d
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
 
           {/* VIPs expirando em 4-7 dias */}
           {expiringThisWeek.length > 0 && (
             <div className="space-y-2">
-              <h4 className="font-medium text-muted-foreground flex items-center gap-2">
-                <Clock className="w-4 h-4" />
+              <h4 className="font-medium text-muted-foreground flex items-center gap-2 text-sm">
+                <Clock className="w-3 h-3" />
                 Esta Semana ({expiringThisWeek.length})
               </h4>
-              {expiringThisWeek.map(vip => {
-                const daysRemaining = calculateDaysRemaining(vip.endDate);
-                return (
-                  <div key={vip.id} className="flex items-center justify-between p-2 rounded bg-muted/20 border border-muted">
-                    <span>{vip.playerName}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {formatDate(vip.endDate)}
-                    </span>
-                  </div>
-                );
-              })}
+              <div className="grid grid-cols-2 gap-2">
+                {expiringThisWeek.map(vip => {
+                  const daysRemaining = calculateDaysRemaining(vip.endDate);
+                  return (
+                    <div key={vip.id} className="flex items-center justify-between p-2 rounded bg-muted/20 border border-muted text-xs">
+                      <span className="truncate">{vip.playerName}</span>
+                      <span className="text-muted-foreground ml-2">
+                        {daysRemaining}d
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
         </CardContent>

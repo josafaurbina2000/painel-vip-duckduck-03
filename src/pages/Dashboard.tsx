@@ -18,14 +18,14 @@ const Dashboard = () => {
 
   const recentVips = vips
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 5);
+    .slice(0, 8);
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Sistema de Notificações */}
+      {/* Sistema de Notificações - mais compacto */}
       <NotificationSystem vips={vips} />
 
-      {/* Cards de estatísticas */}
+      {/* Cards de estatísticas em linha */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <StatsCard
           title="VIPs Ativos"
@@ -58,11 +58,12 @@ const Dashboard = () => {
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Grid principal com 3 colunas */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* VIPs expirando em breve */}
         <Card className="bg-card/50 backdrop-blur-sm border-border">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2 text-lg">
               <Calendar className="w-5 h-5 text-warning" />
               VIPs Expirando em Breve
             </CardTitle>
@@ -73,7 +74,7 @@ const Dashboard = () => {
                 Nenhum VIP expirando nos próximos 7 dias
               </p>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-3 max-h-80 overflow-y-auto">
                 {expiringSoonVips.map((vip) => {
                   const daysRemaining = calculateDaysRemaining(vip.endDate);
                   return (
@@ -81,14 +82,14 @@ const Dashboard = () => {
                       key={vip.id}
                       className="flex items-center justify-between p-3 rounded-lg bg-warning/5 border border-warning/20"
                     >
-                      <div>
-                        <p className="font-medium">{vip.playerName}</p>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium truncate">{vip.playerName}</p>
                         <p className="text-sm text-muted-foreground">
-                          Expira em {daysRemaining} {daysRemaining === 1 ? 'dia' : 'dias'}
+                          {daysRemaining} {daysRemaining === 1 ? 'dia' : 'dias'}
                         </p>
                       </div>
-                      <div className="text-right">
-                        <p className="text-sm font-medium text-warning">
+                      <div className="text-right ml-2">
+                        <p className="text-xs font-medium text-warning">
                           {formatDate(vip.endDate)}
                         </p>
                         <VIPBadge status={vip.status} />
@@ -101,28 +102,28 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        {/* VIPs recentes */}
-        <Card className="bg-card/50 backdrop-blur-sm border-border">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+        {/* VIPs recentes - expandido */}
+        <Card className="bg-card/50 backdrop-blur-sm border-border lg:col-span-2">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-2 text-lg">
               <Users className="w-5 h-5 text-primary" />
               VIPs Recentes
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-80 overflow-y-auto">
               {recentVips.map((vip) => (
                 <div
                   key={vip.id}
                   className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
                 >
-                  <div>
-                    <p className="font-medium">{vip.playerName}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium truncate">{vip.playerName}</p>
                     <p className="text-sm text-muted-foreground">
                       {formatDate(vip.createdAt)} • {vip.durationDays} dias
                     </p>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col items-end gap-1 ml-2">
                     <span className="text-sm font-medium">
                       {formatCurrency(vip.amountPaid)}
                     </span>
@@ -135,19 +136,19 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      {/* Resumo Financeiro */}
+      {/* Resumo Financeiro - 2 colunas maiores */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="bg-gradient-to-br from-success/20 to-success/5 border-success/20">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Receita Total</p>
-                <p className="text-2xl font-bold text-success">{formatCurrency(stats.totalRevenue)}</p>
+                <p className="text-3xl font-bold text-success">{formatCurrency(stats.totalRevenue)}</p>
                 <p className="text-xs text-muted-foreground mt-1">
                   De todos os VIPs ativos
                 </p>
               </div>
-              <DollarSign className="w-8 h-8 text-success" />
+              <DollarSign className="w-10 h-10 text-success" />
             </div>
           </CardContent>
         </Card>
@@ -157,12 +158,12 @@ const Dashboard = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total de VIPs</p>
-                <p className="text-2xl font-bold text-primary">{stats.totalActive + stats.totalExpired}</p>
+                <p className="text-3xl font-bold text-primary">{stats.totalActive + stats.totalExpired}</p>
                 <p className="text-xs text-muted-foreground mt-1">
                   {stats.totalActive} ativos • {stats.totalExpired} expirados
                 </p>
               </div>
-              <Users className="w-8 h-8 text-primary" />
+              <Users className="w-10 h-10 text-primary" />
             </div>
           </CardContent>
         </Card>
