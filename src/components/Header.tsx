@@ -1,3 +1,4 @@
+
 import { Badge } from "@/components/ui/badge";
 
 const Header = () => {
@@ -9,7 +10,7 @@ const Header = () => {
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden">
                 <img 
-                  src="/lovable-uploads/a0e81e3e-a72b-4ec3-93b3-b0faf01fbf0e.png" 
+                  src="/lovable-uploads/a4e81e3e-a72b-4ec3-93b3-b0faf01fbf0e.png" 
                   alt="BF4 VIP Panel Logo" 
                   className="w-full h-full object-cover"
                 />
