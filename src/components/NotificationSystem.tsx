@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -17,21 +16,18 @@ const NotificationSystem = ({ vips }: NotificationSystemProps) => {
 
   // VIPs expirando hoje
   const expiringToday = vips.filter(vip => {
-    if (vip.isPermanent) return false;
     const daysRemaining = calculateDaysRemaining(vip.endDate);
     return daysRemaining === 0;
   });
 
   // VIPs expirando em 1-3 dias
   const expiringSoon = vips.filter(vip => {
-    if (vip.isPermanent) return false;
     const daysRemaining = calculateDaysRemaining(vip.endDate);
     return daysRemaining > 0 && daysRemaining <= 3;
   });
 
   // VIPs expirando em 4-7 dias
   const expiringThisWeek = vips.filter(vip => {
-    if (vip.isPermanent) return false;
     const daysRemaining = calculateDaysRemaining(vip.endDate);
     return daysRemaining > 3 && daysRemaining <= 7;
   });
