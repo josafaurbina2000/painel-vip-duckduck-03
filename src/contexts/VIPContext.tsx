@@ -40,19 +40,15 @@ export const VIPProvider: React.FC<VIPProviderProps> = ({ children }) => {
         startDate: new Date(vip.startDate),
         endDate: new Date(vip.endDate),
         createdAt: new Date(vip.createdAt),
-        // Migração: converter paymentProof string para VIPFile se necessário
+        // Remover propriedades de VIP permanente se existirem
+        isPermanent: undefined,
         paymentProof: typeof vip.paymentProof === 'string' && vip.paymentProof 
-          ? null // Remove dados antigos de string
+          ? null 
           : vip.paymentProof
       }));
       setVips(vipsWithDates);
     } else {
-      // Usar dados mock como inicial, mas limpar paymentProof que eram strings
-      const migratedMockVips = mockVips.map(vip => ({
-        ...vip,
-        paymentProof: undefined // Remove strings dos dados mock
-      }));
-      setVips(migratedMockVips);
+      setVips(mockVips);
     }
   }, []);
 

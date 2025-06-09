@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Search, Filter, Calendar, User, Trash2, Edit, Paperclip } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -77,7 +76,6 @@ const VIPList = () => {
                   <SelectItem value="all">Todos</SelectItem>
                   <SelectItem value="active">Ativos</SelectItem>
                   <SelectItem value="expired">Expirados</SelectItem>
-                  <SelectItem value="permanent">Permanentes</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -112,7 +110,7 @@ const VIPList = () => {
       {/* Lista de VIPs */}
       <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
         {filteredVips.map((vip) => {
-          const daysRemaining = vip.isPermanent ? null : calculateDaysRemaining(vip.endDate);
+          const daysRemaining = calculateDaysRemaining(vip.endDate);
           
           return (
             <Card key={vip.id} className="bg-card/50 backdrop-blur-sm border-border hover:shadow-lg transition-all duration-300 hover:scale-105">
@@ -146,30 +144,24 @@ const VIPList = () => {
                       <p className="font-semibold text-lg">{formatCurrency(vip.amountPaid)}</p>
                     </div>
                     <div>
-                      <p className="text-muted-foreground">
-                        {vip.isPermanent ? 'Status' : 'Vencimento'}
-                      </p>
-                      <p className="font-semibold">
-                        {vip.isPermanent ? 'Permanente' : formatDate(vip.endDate)}
-                      </p>
+                      <p className="text-muted-foreground">Vencimento</p>
+                      <p className="font-semibold">{formatDate(vip.endDate)}</p>
                     </div>
                   </div>
 
-                  {/* Dias restantes (se não for permanente) */}
-                  {!vip.isPermanent && daysRemaining !== null && (
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm">
-                        {daysRemaining > 0 ? (
-                          <span className={daysRemaining <= 7 ? 'text-warning font-medium' : 'text-muted-foreground'}>
-                            {daysRemaining} {daysRemaining === 1 ? 'dia restante' : 'dias restantes'}
-                          </span>
-                        ) : (
-                          <span className="text-danger font-medium">Expirado</span>
-                        )}
-                      </span>
-                    </div>
-                  )}
+                  {/* Dias restantes */}
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm">
+                      {daysRemaining > 0 ? (
+                        <span className={daysRemaining <= 7 ? 'text-warning font-medium' : 'text-muted-foreground'}>
+                          {daysRemaining} {daysRemaining === 1 ? 'dia restante' : 'dias restantes'}
+                        </span>
+                      ) : (
+                        <span className="text-danger font-medium">Expirado</span>
+                      )}
+                    </span>
+                  </div>
 
                   {/* Comprovante (se houver) */}
                   {vip.paymentProof && (

@@ -10,10 +10,9 @@ export const mockVips: VIP[] = [
     durationDays: 30,
     endDate: new Date("2024-07-01"),
     amountPaid: 25.00,
-    paymentProof: undefined, // Removido string, agora usa VIPFile
+    paymentProof: undefined,
     createdAt: new Date("2024-06-01"),
     observations: "Pagamento via PIX, cliente frequente",
-    isPermanent: false,
     status: 'active'
   },
   {
@@ -23,24 +22,22 @@ export const mockVips: VIP[] = [
     durationDays: 15,
     endDate: new Date("2024-05-30"),
     amountPaid: 15.00,
-    paymentProof: undefined, // Removido string, agora usa VIPFile
+    paymentProof: undefined,
     createdAt: new Date("2024-05-15"),
     observations: "",
-    isPermanent: false,
     status: 'expired'
   },
   {
     id: "3",
     playerName: "TANK_MASTER_2024",
-    startDate: new Date("2024-01-01"),
-    durationDays: 0,
-    endDate: new Date("2099-12-31"),
-    amountPaid: 100.00,
-    paymentProof: undefined, // Removido string, agora usa VIPFile
-    createdAt: new Date("2024-01-01"),
-    observations: "VIP Permanente - Doação especial para manutenção do servidor",
-    isPermanent: true,
-    status: 'permanent'
+    startDate: new Date("2024-06-01"),
+    durationDays: 60,
+    endDate: new Date("2024-08-01"),
+    amountPaid: 50.00,
+    paymentProof: undefined,
+    createdAt: new Date("2024-06-01"),
+    observations: "VIP de longa duração - Cliente premium",
+    status: 'active'
   },
   {
     id: "4",
@@ -49,10 +46,9 @@ export const mockVips: VIP[] = [
     durationDays: 30,
     endDate: new Date("2024-07-05"),
     amountPaid: 30.00,
-    paymentProof: undefined, // Removido string, agora usa VIPFile
+    paymentProof: undefined,
     createdAt: new Date("2024-06-05"),
     observations: "Pagamento via transferência bancária",
-    isPermanent: false,
     status: 'active'
   },
   {
@@ -62,10 +58,9 @@ export const mockVips: VIP[] = [
     durationDays: 7,
     endDate: new Date("2024-06-15"),
     amountPaid: 10.00,
-    paymentProof: undefined, // Removido string, agora usa VIPFile
+    paymentProof: undefined,
     createdAt: new Date("2024-06-08"),
     observations: "",
-    isPermanent: false,
     status: 'expired'
   }
 ];
@@ -73,10 +68,6 @@ export const mockVips: VIP[] = [
 // Recalcula o status baseado na data atual
 export const getVipsWithCurrentStatus = (): VIP[] => {
   return mockVips.map(vip => {
-    if (vip.isPermanent) {
-      return { ...vip, status: 'permanent' };
-    }
-    
     const now = new Date();
     const endDate = new Date(vip.endDate);
     const status = endDate >= now ? 'active' : 'expired';

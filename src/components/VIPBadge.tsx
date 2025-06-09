@@ -2,7 +2,7 @@
 import { Badge } from "@/components/ui/badge";
 
 interface VIPBadgeProps {
-  status: 'active' | 'expired' | 'permanent';
+  status: 'active' | 'expired';
   className?: string;
 }
 
@@ -15,10 +15,6 @@ const VIPBadge = ({ status, className }: VIPBadgeProps) => {
     expired: {
       className: "bg-danger/10 text-danger border-danger/20 hover:bg-danger/20",
       label: "Expirado"
-    },
-    permanent: {
-      className: "bg-info/10 text-info border-info/20 hover:bg-info/20",
-      label: "Permanente"
     }
   };
 

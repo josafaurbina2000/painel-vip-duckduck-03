@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Calendar, DollarSign, FileText, User, ArrowLeft } from "lucide-react";
@@ -7,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
 import { useVIP } from "@/contexts/VIPContext";
 import { useToast } from "@/hooks/use-toast";
 import { VIPFile } from "@/types/vip";
@@ -25,7 +23,6 @@ const AddVIP = () => {
     amountPaid: "",
     startDate: new Date().toISOString().split('T')[0],
     durationDays: "",
-    isPermanent: false,
     paymentProof: null as VIPFile | null,
     observations: ""
   });
@@ -42,7 +39,6 @@ const AddVIP = () => {
           amountPaid: vip.amountPaid.toString(),
           startDate: new Date(vip.startDate).toISOString().split('T')[0],
           durationDays: vip.durationDays.toString(),
-          isPermanent: vip.isPermanent,
           paymentProof: vip.paymentProof || null,
           observations: vip.observations || ""
         });
@@ -50,7 +46,7 @@ const AddVIP = () => {
     }
   }, [editId, getVIPById]);
 
-  const handleInputChange = (field: string, value: string | boolean | VIPFile | null) => {
+  const handleInputChange = (field: string, value: string | VIPFile | null) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -81,27 +77,24 @@ const AddVIP = () => {
         return;
       }
 
-      if (!formData.isPermanent && (!formData.durationDays || parseInt(formData.durationDays) <= 0)) {
+      if (!formData.durationDays || parseInt(formData.durationDays) <= 0) {
         toast({
           title: "Erro",
-          description: "Duração em dias é obrigatória para VIPs temporários.",
+          description: "Duração em dias é obrigatória.",
           variant: "destructive",
         });
         return;
       }
 
       const startDate = new Date(formData.startDate);
-      const endDate = formData.isPermanent 
-        ? new Date(startDate.getTime() + 365 * 24 * 60 * 60 * 1000) // 1 ano no futuro para permanentes
-        : new Date(startDate.getTime() + parseInt(formData.durationDays) * 24 * 60 * 60 * 1000);
+      const endDate = new Date(startDate.getTime() + parseInt(formData.durationDays) * 24 * 60 * 60 * 1000);
 
       const vipData = {
         playerName: formData.playerName.trim(),
         amountPaid: parseFloat(formData.amountPaid),
         startDate,
         endDate,
-        durationDays: formData.isPermanent ? 0 : parseInt(formData.durationDays),
-        isPermanent: formData.isPermanent,
+        durationDays: parseInt(formData.durationDays),
         paymentProof: formData.paymentProof,
         observations: formData.observations.trim(),
         createdAt: editId ? getVIPById(editId)?.createdAt || new Date() : new Date()
@@ -203,32 +196,19 @@ const AddVIP = () => {
                     />
                   </div>
 
-                  {!formData.isPermanent && (
-                    <div>
-                      <Label htmlFor="durationDays">Duração (dias) *</Label>
-                      <Input
-                        id="durationDays"
-                        type="number"
-                        min="1"
-                        value={formData.durationDays}
-                        onChange={(e) => handleInputChange("durationDays", e.target.value)}
-                        placeholder="Ex: 30"
-                        className="bg-background/50"
-                        required={!formData.isPermanent}
-                      />
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="isPermanent"
-                    checked={formData.isPermanent}
-                    onCheckedChange={(checked) => handleInputChange("isPermanent", checked)}
-                  />
-                  <Label htmlFor="isPermanent" className="text-sm font-medium">
-                    VIP Permanente
-                  </Label>
+                  <div>
+                    <Label htmlFor="durationDays">Duração (dias) *</Label>
+                    <Input
+                      id="durationDays"
+                      type="number"
+                      min="1"
+                      value={formData.durationDays}
+                      onChange={(e) => handleInputChange("durationDays", e.target.value)}
+                      placeholder="Ex: 30"
+                      className="bg-background/50"
+                      required
+                    />
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -309,20 +289,11 @@ const AddVIP = () => {
                   </div>
                   
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Tipo</span>
+                    <span className="text-muted-foreground">Duração</span>
                     <span className="font-medium">
-                      {formData.isPermanent ? "Permanente" : "Temporário"}
+                      {formData.durationDays ? `${formData.durationDays} dias` : "—"}
                     </span>
                   </div>
-                  
-                  {!formData.isPermanent && (
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Duração</span>
-                      <span className="font-medium">
-                        {formData.durationDays ? `${formData.durationDays} dias` : "—"}
-                      </span>
-                    </div>
-                  )}
 
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Comprovante</span>

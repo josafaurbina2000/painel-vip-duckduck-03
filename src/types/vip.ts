@@ -13,28 +13,23 @@ export interface VIP {
   durationDays: number;
   endDate: Date;
   amountPaid: number;
-  paymentProof?: VIPFile; // Changed from string to VIPFile
+  paymentProof?: VIPFile;
   createdAt: Date;
   observations?: string;
-  isPermanent: boolean;
-  status: 'active' | 'expired' | 'permanent';
+  status: 'active' | 'expired';
 }
 
 export interface VIPStats {
   totalActive: number;
   totalExpired: number;
-  totalPermanent: number;
-  totalTemporary: number;
   totalRevenue: number;
   monthlyRevenue: number;
-  permanentRevenue: number;
-  temporaryRevenue: number;
   monthlyTrend: number;
   expiringInDays: number;
 }
 
 export interface VIPFilters {
   search?: string;
-  status?: 'all' | 'active' | 'expired' | 'permanent';
+  status?: 'all' | 'active' | 'expired';
   expiringInDays?: number;
 }

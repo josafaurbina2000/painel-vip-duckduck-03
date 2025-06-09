@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Edit, Trash2, Calendar, DollarSign, FileText, User, Crown, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -45,7 +44,7 @@ const VIPDetails = () => {
     );
   }
 
-  const daysRemaining = vip.isPermanent ? null : calculateDaysRemaining(vip.endDate);
+  const daysRemaining = calculateDaysRemaining(vip.endDate);
 
   const handleDeleteVIP = () => {
     deleteVIP(vip.id);
@@ -57,17 +56,15 @@ const VIPDetails = () => {
   };
 
   const handleExtendVIP = () => {
-    if (!vip.isPermanent) {
-      const newEndDate = new Date(vip.endDate);
-      newEndDate.setDate(newEndDate.getDate() + 30);
-      
-      updateVIP(vip.id, { endDate: newEndDate, durationDays: vip.durationDays + 30 });
-      
-      toast({
-        title: "VIP estendido",
-        description: `O VIP de ${vip.playerName} foi estendido por mais 30 dias.`,
-      });
-    }
+    const newEndDate = new Date(vip.endDate);
+    newEndDate.setDate(newEndDate.getDate() + 30);
+    
+    updateVIP(vip.id, { endDate: newEndDate, durationDays: vip.durationDays + 30 });
+    
+    toast({
+      title: "VIP estendido",
+      description: `O VIP de ${vip.playerName} foi estendido por mais 30 dias.`,
+    });
   };
 
   const handleEditVIP = () => {
@@ -123,12 +120,10 @@ const VIPDetails = () => {
                     <p className="font-semibold">{formatDate(vip.startDate)}</p>
                   </div>
                   
-                  {!vip.isPermanent && (
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">Data de Vencimento</p>
-                      <p className="font-semibold">{formatDate(vip.endDate)}</p>
-                    </div>
-                  )}
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Data de Vencimento</p>
+                    <p className="font-semibold">{formatDate(vip.endDate)}</p>
+                  </div>
                   
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">Data de Cadastro</p>
@@ -139,29 +134,18 @@ const VIPDetails = () => {
                 <div className="space-y-4">
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">Duração</p>
-                    <p className="font-semibold">
-                      {vip.isPermanent ? (
-                        <Badge className="bg-info/10 text-info border-info/20">
-                          <Crown className="w-3 h-3 mr-1" />
-                          Permanente
-                        </Badge>
-                      ) : (
-                        `${vip.durationDays} dias`
-                      )}
-                    </p>
+                    <p className="font-semibold">{vip.durationDays} dias</p>
                   </div>
                   
-                  {!vip.isPermanent && daysRemaining !== null && (
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">Dias Restantes</p>
-                      <p className={`font-semibold ${
-                        daysRemaining <= 0 ? 'text-danger' : 
-                        daysRemaining <= 7 ? 'text-warning' : 'text-success'
-                      }`}>
-                        {daysRemaining > 0 ? daysRemaining : 'Expirado'}
-                      </p>
-                    </div>
-                  )}
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Dias Restantes</p>
+                    <p className={`font-semibold ${
+                      daysRemaining <= 0 ? 'text-danger' : 
+                      daysRemaining <= 7 ? 'text-warning' : 'text-success'
+                    }`}>
+                      {daysRemaining > 0 ? daysRemaining : 'Expirado'}
+                    </p>
+                  </div>
                   
                   <div>
                     <p className="text-sm text-muted-foreground mb-1">Status</p>
@@ -240,18 +224,9 @@ const VIPDetails = () => {
                 </div>
                 
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Tipo</span>
-                  <span className="font-medium">
-                    {vip.isPermanent ? 'Permanente' : 'Temporário'}
-                  </span>
+                  <span className="text-sm text-muted-foreground">Duração</span>
+                  <span className="font-medium">{vip.durationDays} dias</span>
                 </div>
-                
-                {!vip.isPermanent && (
-                  <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Duração</span>
-                    <span className="font-medium">{vip.durationDays} dias</span>
-                  </div>
-                )}
               </div>
             </CardContent>
           </Card>
@@ -267,7 +242,7 @@ const VIPDetails = () => {
                 Editar VIP
               </Button>
               
-              {!vip.isPermanent && vip.status === 'active' && (
+              {vip.status === 'active' && (
                 <Button variant="outline" className="w-full justify-start" onClick={handleExtendVIP}>
                   <Clock className="w-4 h-4 mr-2" />
                   Estender Duração (+30 dias)
