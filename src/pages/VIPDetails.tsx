@@ -10,6 +10,7 @@ import { useVIP } from "@/contexts/VIPContext";
 import { calculateDaysRemaining, formatCurrency, formatDate, formatDateTime } from "@/utils/vipUtils";
 import { useToast } from "@/hooks/use-toast";
 import VIPBadge from "@/components/VIPBadge";
+import FileViewer from "@/components/FileViewer";
 
 const VIPDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -185,44 +186,13 @@ const VIPDetails = () => {
                   <p className="text-sm text-muted-foreground">Valor Pago</p>
                   <p className="text-2xl font-bold text-success">{formatCurrency(vip.amountPaid)}</p>
                 </div>
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      <FileText className="w-4 h-4 mr-2" />
-                      Ver Comprovante
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-3xl bg-background border-border">
-                    <DialogHeader>
-                      <DialogTitle>Comprovante de Pagamento</DialogTitle>
-                      <DialogDescription>
-                        Comprovante de pagamento de {vip.playerName}
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="p-4 bg-muted/30 rounded-lg min-h-[400px] flex items-center justify-center">
-                      <div className="text-center">
-                        <FileText className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                        <p className="text-muted-foreground mb-2">
-                          Comprovante de Pagamento
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          <strong>Jogador:</strong> {vip.playerName}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          <strong>Valor:</strong> {formatCurrency(vip.amountPaid)}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          <strong>Data:</strong> {formatDate(vip.createdAt)}
-                        </p>
-                        {vip.paymentProof && (
-                          <p className="text-sm text-muted-foreground mt-2 p-2 bg-background rounded">
-                            {vip.paymentProof}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
+                {vip.paymentProof ? (
+                  <FileViewer file={vip.paymentProof} />
+                ) : (
+                  <div className="text-sm text-muted-foreground">
+                    Nenhum comprovante anexado
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

@@ -10,7 +10,7 @@ export const mockVips: VIP[] = [
     durationDays: 30,
     endDate: new Date("2024-07-01"),
     amountPaid: 25.00,
-    paymentProof: "/placeholder-receipt.jpg",
+    paymentProof: undefined, // Removido string, agora usa VIPFile
     createdAt: new Date("2024-06-01"),
     observations: "Pagamento via PIX, cliente frequente",
     isPermanent: false,
@@ -23,7 +23,7 @@ export const mockVips: VIP[] = [
     durationDays: 15,
     endDate: new Date("2024-05-30"),
     amountPaid: 15.00,
-    paymentProof: "/placeholder-receipt.jpg",
+    paymentProof: undefined, // Removido string, agora usa VIPFile
     createdAt: new Date("2024-05-15"),
     observations: "",
     isPermanent: false,
@@ -36,7 +36,7 @@ export const mockVips: VIP[] = [
     durationDays: 0,
     endDate: new Date("2099-12-31"),
     amountPaid: 100.00,
-    paymentProof: "/placeholder-receipt.jpg",
+    paymentProof: undefined, // Removido string, agora usa VIPFile
     createdAt: new Date("2024-01-01"),
     observations: "VIP Permanente - Doação especial para manutenção do servidor",
     isPermanent: true,
@@ -49,7 +49,7 @@ export const mockVips: VIP[] = [
     durationDays: 30,
     endDate: new Date("2024-07-05"),
     amountPaid: 30.00,
-    paymentProof: "/placeholder-receipt.jpg",
+    paymentProof: undefined, // Removido string, agora usa VIPFile
     createdAt: new Date("2024-06-05"),
     observations: "Pagamento via transferência bancária",
     isPermanent: false,
@@ -62,7 +62,7 @@ export const mockVips: VIP[] = [
     durationDays: 7,
     endDate: new Date("2024-06-15"),
     amountPaid: 10.00,
-    paymentProof: "/placeholder-receipt.jpg",
+    paymentProof: undefined, // Removido string, agora usa VIPFile
     createdAt: new Date("2024-06-08"),
     observations: "",
     isPermanent: false,

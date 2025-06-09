@@ -131,7 +131,7 @@ const VIPList = () => {
                             Cadastrado em {formatDate(vip.createdAt)}
                           </p>
                           {vip.paymentProof && (
-                            <Paperclip className="w-3 h-3 text-primary" title="Comprovante anexado" />
+                            <Paperclip className="w-3 h-3 text-primary" />
                           )}
                         </div>
                       </div>
