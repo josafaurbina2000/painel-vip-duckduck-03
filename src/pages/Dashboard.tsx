@@ -1,6 +1,8 @@
+
 import { Users, DollarSign, Clock, Calendar } from "lucide-react";
 import StatsCard from "@/components/StatsCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useVIP } from "@/contexts/VIPContext";
 import { calculateStats, calculateDaysRemaining, formatCurrency, formatDate } from "@/utils/vipUtils";
 import VIPBadge from "@/components/VIPBadge";
@@ -18,6 +20,15 @@ const Dashboard = () => {
   const recentVips = vips
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 8);
+
+  // VIPs ativos
+  const activeVips = vips.filter(vip => vip.status === 'active');
+
+  // VIPs expirando em 7 dias
+  const expiring7Days = vips.filter(vip => {
+    const daysRemaining = calculateDaysRemaining(vip.endDate);
+    return daysRemaining === 7;
+  });
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -54,28 +65,93 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      {/* Segunda linha - Stats cards compactos e Centro de Notificações */}
+      {/* Segunda linha - Cards customizados e Centro de Notificações */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[400px]">
-        {/* Stats cards ocupando 2 colunas */}
+        {/* Cards customizados ocupando 2 colunas */}
         <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
-          <StatsCard
-            title="VIPs Ativos"
-            value={stats.totalActive}
-            icon={Users}
-            description="VIPs temporários ativos"
-            color="success"
-            trend={{
-              value: stats.monthlyTrend,
-              isPositive: stats.monthlyTrend >= 0
-            }}
-          />
-          <StatsCard
-            title="Expirando em 7 dias"
-            value={stats.expiringInDays}
-            icon={Clock}
-            description="VIPs vencendo em breve"
-            color="danger"
-          />
+          
+          {/* Card VIPs Ativos com lista de nomes */}
+          <Card className="relative overflow-hidden bg-gradient-to-br from-success/20 to-success/5 border-success/20 border transition-all duration-300 hover:scale-105 hover:shadow-lg h-full">
+            <CardContent className="p-4 h-full flex flex-col">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    VIPs Ativos
+                  </p>
+                  <p className="text-2xl font-bold tracking-tight text-success">
+                    {stats.totalActive}
+                  </p>
+                </div>
+                <div className="p-2 rounded-lg bg-background/50 text-success">
+                  <Users className="w-5 h-5" />
+                </div>
+              </div>
+              
+              <div className="flex-1 min-h-0">
+                <ScrollArea className="h-full">
+                  <div className="space-y-1">
+                    {activeVips.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">Nenhum VIP ativo</p>
+                    ) : (
+                      activeVips.map((vip) => (
+                        <div
+                          key={vip.id}
+                          className="p-2 rounded bg-background/30 border border-success/10"
+                        >
+                          <p className="text-xs font-medium truncate">{vip.playerName}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {calculateDaysRemaining(vip.endDate)} dias restantes
+                          </p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </ScrollArea>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Card Expirando em 7 dias com lista de nomes */}
+          <Card className="relative overflow-hidden bg-gradient-to-br from-danger/20 to-danger/5 border-danger/20 border transition-all duration-300 hover:scale-105 hover:shadow-lg h-full">
+            <CardContent className="p-4 h-full flex flex-col">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                    Expirando em 7 dias
+                  </p>
+                  <p className="text-2xl font-bold tracking-tight text-danger">
+                    {expiring7Days.length}
+                  </p>
+                </div>
+                <div className="p-2 rounded-lg bg-background/50 text-danger">
+                  <Clock className="w-5 h-5" />
+                </div>
+              </div>
+              
+              <div className="flex-1 min-h-0">
+                <ScrollArea className="h-full">
+                  <div className="space-y-1">
+                    {expiring7Days.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">Nenhum VIP expirando em 7 dias</p>
+                    ) : (
+                      expiring7Days.map((vip) => (
+                        <div
+                          key={vip.id}
+                          className="p-2 rounded bg-background/30 border border-danger/10"
+                        >
+                          <p className="text-xs font-medium truncate">{vip.playerName}</p>
+                          <p className="text-xs text-muted-foreground">
+                            Expira em {formatDate(vip.endDate)}
+                          </p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </ScrollArea>
+              </div>
+            </CardContent>
+          </Card>
+
         </div>
 
         {/* Centro de Notificações ocupando 2 colunas */}
@@ -100,30 +176,32 @@ const Dashboard = () => {
                 Nenhum VIP expirando nos próximos 7 dias
               </p>
             ) : (
-              <div className="space-y-3 max-h-80 overflow-y-auto">
-                {expiringSoonVips.map((vip) => {
-                  const daysRemaining = calculateDaysRemaining(vip.endDate);
-                  return (
-                    <div
-                      key={vip.id}
-                      className="flex items-center justify-between p-3 rounded-lg bg-warning/5 border border-warning/20"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <p className="font-medium truncate">{vip.playerName}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {daysRemaining} {daysRemaining === 1 ? 'dia' : 'dias'}
-                        </p>
+              <ScrollArea className="h-80">
+                <div className="space-y-3">
+                  {expiringSoonVips.map((vip) => {
+                    const daysRemaining = calculateDaysRemaining(vip.endDate);
+                    return (
+                      <div
+                        key={vip.id}
+                        className="flex items-center justify-between p-3 rounded-lg bg-warning/5 border border-warning/20"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium truncate">{vip.playerName}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {daysRemaining} {daysRemaining === 1 ? 'dia' : 'dias'}
+                          </p>
+                        </div>
+                        <div className="text-right ml-2">
+                          <p className="text-xs font-medium text-warning">
+                            {formatDate(vip.endDate)}
+                          </p>
+                          <VIPBadge status={vip.status} />
+                        </div>
                       </div>
-                      <div className="text-right ml-2">
-                        <p className="text-xs font-medium text-warning">
-                          {formatDate(vip.endDate)}
-                        </p>
-                        <VIPBadge status={vip.status} />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              </ScrollArea>
             )}
           </CardContent>
         </Card>
@@ -137,27 +215,29 @@ const Dashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-80 overflow-y-auto">
-              {recentVips.map((vip) => (
-                <div
-                  key={vip.id}
-                  className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium truncate">{vip.playerName}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {formatDate(vip.createdAt)} • {vip.durationDays} dias
-                    </p>
+            <ScrollArea className="h-80">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {recentVips.map((vip) => (
+                  <div
+                    key={vip.id}
+                    className="flex items-center justify-between p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium truncate">{vip.playerName}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {formatDate(vip.createdAt)} • {vip.durationDays} dias
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-end gap-1 ml-2">
+                      <span className="text-sm font-medium">
+                        {formatCurrency(vip.amountPaid)}
+                      </span>
+                      <VIPBadge status={vip.status} />
+                    </div>
                   </div>
-                  <div className="flex flex-col items-end gap-1 ml-2">
-                    <span className="text-sm font-medium">
-                      {formatCurrency(vip.amountPaid)}
-                    </span>
-                    <VIPBadge status={vip.status} />
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            </ScrollArea>
           </CardContent>
         </Card>
       </div>
