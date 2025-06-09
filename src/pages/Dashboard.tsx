@@ -1,16 +1,21 @@
-import { Users, DollarSign, Clock, Calendar } from "lucide-react";
+import { Users, DollarSign, Clock, Calendar, Trash2 } from "lucide-react";
 import StatsCard from "@/components/StatsCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
 import { useVIP } from "@/contexts/VIPContext";
 import { calculateStats, calculateDaysRemaining, formatCurrency, formatDate } from "@/utils/vipUtils";
 import VIPBadge from "@/components/VIPBadge";
 import NotificationSystem from "@/components/NotificationSystem";
+import { useToast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
   const {
-    vips
+    vips,
+    clearAllData
   } = useVIP();
+  const { toast } = useToast();
+  
   const stats = calculateStats(vips);
   const expiringSoonVips = vips.filter(vip => {
     const daysRemaining = calculateDaysRemaining(vip.endDate);
@@ -27,7 +32,28 @@ const Dashboard = () => {
     return daysRemaining === 7;
   });
 
+  const handleClearAllData = () => {
+    clearAllData();
+    toast({
+      title: "Dados limpos com sucesso",
+      description: "Todos os dados foram removidos. Sistema pronto para Supabase.",
+    });
+  };
+
   return <div className="space-y-6 animate-fade-in">
+      {/* Botão de limpeza no topo */}
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <Button 
+          onClick={handleClearAllData}
+          variant="destructive"
+          className="flex items-center gap-2"
+        >
+          <Trash2 className="w-4 h-4" />
+          Limpar Todos os Dados
+        </Button>
+      </div>
+
       {/* Cards principais no topo - Receita Total e Total de VIPs */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="bg-gradient-to-br from-success/20 to-success/5 border-success/20">

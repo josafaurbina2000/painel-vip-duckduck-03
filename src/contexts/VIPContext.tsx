@@ -29,38 +29,17 @@ interface VIPProviderProps {
 export const VIPProvider: React.FC<VIPProviderProps> = ({ children }) => {
   const [vips, setVips] = useState<VIP[]>([]);
 
-  // Carregar dados do localStorage - SEM fallback para mock data
+  // Forçar limpeza completa na inicialização - PREPARAÇÃO PARA SUPABASE
   useEffect(() => {
-    const savedVips = localStorage.getItem('vips');
-    if (savedVips) {
-      try {
-        const parsedVips = JSON.parse(savedVips);
-        // Converter strings de data de volta para objetos Date
-        const vipsWithDates = parsedVips.map((vip: any) => ({
-          ...vip,
-          startDate: new Date(vip.startDate),
-          endDate: new Date(vip.endDate),
-          createdAt: new Date(vip.createdAt),
-          // Limpar propriedades desnecessárias
-          isPermanent: undefined,
-          paymentProof: typeof vip.paymentProof === 'string' && vip.paymentProof 
-            ? null 
-            : vip.paymentProof
-        }));
-        setVips(vipsWithDates);
-      } catch (error) {
-        console.error('Erro ao carregar VIPs do localStorage:', error);
-        setVips([]);
-      }
-    } else {
-      // Inicializar com array vazio - PRONTO PARA SUPABASE
-      setVips([]);
-    }
+    // Limpar localStorage automaticamente para garantir início limpo
+    localStorage.removeItem('vips');
+    console.log('Sistema inicializado limpo - pronto para integração Supabase');
+    setVips([]);
   }, []);
 
-  // Salvar no localStorage sempre que os VIPs mudarem
+  // Salvar no localStorage sempre que os VIPs mudarem (apenas se houver dados)
   useEffect(() => {
-    if (vips.length >= 0) { // Salvar mesmo quando array está vazio
+    if (vips.length > 0) {
       localStorage.setItem('vips', JSON.stringify(vips));
     }
   }, [vips]);
@@ -102,11 +81,12 @@ export const VIPProvider: React.FC<VIPProviderProps> = ({ children }) => {
     return vipsWithStatus.find(vip => vip.id === id);
   };
 
-  // Função para limpar todos os dados - PRONTA PARA RESET COMPLETO
+  // Função para limpar todos os dados - PREPARAÇÃO COMPLETA PARA SUPABASE
   const clearAllData = () => {
     setVips([]);
     localStorage.removeItem('vips');
-    console.log('Todos os dados foram limpos. Sistema pronto para Supabase.');
+    localStorage.clear(); // Limpa todo o localStorage para garantia
+    console.log('LIMPEZA COMPLETA: Todos os dados foram removidos. Sistema 100% limpo para Supabase.');
   };
 
   const value: VIPContextType = {
