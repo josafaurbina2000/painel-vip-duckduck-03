@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Calendar, DollarSign, FileText, User, ArrowLeft } from "lucide-react";
@@ -15,7 +16,7 @@ const AddVIP = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const editId = searchParams.get('edit');
-  const { addVIP, updateVIP, getVIPById } = useVIP();
+  const { addVIP, updateVIP, getVIPById, isLoading: contextLoading } = useVIP();
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -31,7 +32,7 @@ const AddVIP = () => {
 
   // Carregar dados para edição
   useEffect(() => {
-    if (editId) {
+    if (editId && !contextLoading) {
       const vip = getVIPById(editId);
       if (vip) {
         setFormData({
@@ -44,7 +45,7 @@ const AddVIP = () => {
         });
       }
     }
-  }, [editId, getVIPById]);
+  }, [editId, getVIPById, contextLoading]);
 
   const handleInputChange = (field: string, value: string | VIPFile | null) => {
     setFormData(prev => ({
@@ -101,26 +102,15 @@ const AddVIP = () => {
       };
 
       if (editId) {
-        updateVIP(editId, vipData);
-        toast({
-          title: "VIP atualizado!",
-          description: `O VIP de ${formData.playerName} foi atualizado com sucesso.`,
-        });
+        await updateVIP(editId, vipData);
       } else {
-        addVIP(vipData);
-        toast({
-          title: "VIP adicionado!",
-          description: `O VIP de ${formData.playerName} foi adicionado com sucesso.`,
-        });
+        await addVIP(vipData);
       }
 
       navigate("/vips");
     } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Ocorreu um erro ao salvar o VIP. Tente novamente.",
-        variant: "destructive",
-      });
+      // Error toast já é mostrado pelo hook
+      console.error('Erro ao salvar VIP:', error);
     } finally {
       setIsLoading(false);
     }
@@ -307,7 +297,7 @@ const AddVIP = () => {
                   <Button
                     type="submit"
                     className="w-full bg-primary hover:bg-primary/90"
-                    disabled={isLoading}
+                    disabled={isLoading || contextLoading}
                   >
                     {isLoading ? "Salvando..." : editId ? "Atualizar VIP" : "Adicionar VIP"}
                   </Button>
@@ -317,6 +307,7 @@ const AddVIP = () => {
                     variant="outline"
                     className="w-full"
                     onClick={() => navigate("/vips")}
+                    disabled={isLoading}
                   >
                     Cancelar
                   </Button>
