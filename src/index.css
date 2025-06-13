@@ -3,10 +3,53 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Tema Dark personalizado para o painel VIP */
+/* Tema Dark e Light personalizado para o painel VIP */
 
 @layer base {
   :root {
+    /* Modo Light */
+    --background: 0 0% 100%;
+    --foreground: 217 19% 9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 217 19% 9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 217 19% 9%;
+
+    --primary: 142 86% 28%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 217 19% 9%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96%;
+    --accent-foreground: 217 19% 9%;
+
+    --destructive: 0 62.8% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 142 86% 28%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 217 19% 9%;
+    --sidebar-primary: 142 86% 28%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 210 40% 96%;
+    --sidebar-accent-foreground: 217 19% 9%;
+    --sidebar-border: 214.3 31.8% 91.4%;
+    --sidebar-ring: 142 86% 28%;
+  }
+
+  .dark {
+    /* Modo Dark */
     --background: 217 19% 9%;
     --foreground: 213 31% 91%;
 
@@ -35,8 +78,6 @@
     --input: 217 19% 18%;
     --ring: 142 86% 28%;
 
-    --radius: 0.75rem;
-
     --sidebar-background: 217 19% 9%;
     --sidebar-foreground: 213 31% 91%;
     --sidebar-primary: 142 86% 28%;
@@ -54,11 +95,11 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground transition-colors duration-300;
     font-family: "Inter", system-ui, -apple-system, sans-serif;
   }
 
-  /* Scrollbar personalizada para tema dark */
+  /* Scrollbar personalizada para ambos os temas */
   ::-webkit-scrollbar {
     width: 8px;
   }
@@ -74,6 +115,19 @@
   ::-webkit-scrollbar-thumb:hover {
     @apply bg-muted-foreground/50;
   }
+
+  /* Scrollbar para modo light */
+  .light ::-webkit-scrollbar-track {
+    @apply bg-muted;
+  }
+
+  .light ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/40 rounded-full;
+  }
+
+  .light ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/60;
+  }
 }
 
 @layer components {
@@ -81,6 +135,13 @@
     backdrop-filter: blur(12px);
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Glass effect para modo light */
+  .light .glass-effect {
+    backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(0, 0, 0, 0.1);
   }
 }
 

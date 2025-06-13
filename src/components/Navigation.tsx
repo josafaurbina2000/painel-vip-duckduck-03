@@ -1,13 +1,20 @@
 
 import { NavLink } from "react-router-dom";
 import { Badge, User, Plus, List } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Navigation = () => {
+  const isMobile = useIsMobile();
+
   const navItems = [
     { to: "/", icon: Badge, label: "Dashboard" },
     { to: "/vips", icon: List, label: "Lista de VIPs" },
     { to: "/add-vip", icon: Plus, label: "Adicionar VIP" },
   ];
+
+  if (isMobile) {
+    return null; // Navigation é tratada pelo MobileNav
+  }
 
   return (
     <nav className="border-b border-border bg-card/30 backdrop-blur-sm">
