@@ -14,7 +14,7 @@ const ThemeToggle = () => {
 
   if (!mounted) {
     return (
-      <Button variant="ghost" size="icon" className="w-9 h-9">
+      <Button variant="ghost" size="icon" className="w-9 h-9 touch-target">
         <div className="w-4 h-4" />
       </Button>
     );
@@ -22,12 +22,24 @@ const ThemeToggle = () => {
 
   const isDark = resolvedTheme === "dark";
 
+  const toggleTheme = () => {
+    const newTheme = isDark ? "light" : "dark";
+    setTheme(newTheme);
+    
+    // Force update para dispositivos móveis
+    setTimeout(() => {
+      document.documentElement.className = newTheme;
+      document.documentElement.setAttribute('data-theme', newTheme);
+    }, 100);
+  };
+
   return (
     <Button
       variant="ghost"
       size="icon"
-      onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="w-9 h-9 hover:bg-accent hover:text-accent-foreground transition-colors"
+      onClick={toggleTheme}
+      className="w-9 h-9 hover:bg-accent hover:text-accent-foreground transition-colors touch-target mobile-transition"
+      aria-label={isDark ? "Alternar para modo claro" : "Alternar para modo escuro"}
     >
       {isDark ? (
         <Sun className="w-4 h-4 transition-all" />
