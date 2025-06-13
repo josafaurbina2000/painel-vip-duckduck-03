@@ -5,7 +5,7 @@ import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
 const ThemeToggle = () => {
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -20,14 +20,16 @@ const ThemeToggle = () => {
     );
   }
 
+  const isDark = resolvedTheme === "dark";
+
   return (
     <Button
       variant="ghost"
       size="icon"
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+      onClick={() => setTheme(isDark ? "light" : "dark")}
       className="w-9 h-9 hover:bg-accent hover:text-accent-foreground transition-colors"
     >
-      {theme === "dark" ? (
+      {isDark ? (
         <Sun className="w-4 h-4 transition-all" />
       ) : (
         <Moon className="w-4 h-4 transition-all" />

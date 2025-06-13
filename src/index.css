@@ -8,43 +8,43 @@
 @layer base {
   :root {
     /* Modo Light */
-    --background: 0 0% 100%;
-    --foreground: 217 19% 9%;
+    --background: 0 0% 98%;
+    --foreground: 217 19% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 217 19% 9%;
+    --card-foreground: 217 19% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 217 19% 9%;
+    --popover-foreground: 217 19% 15%;
 
     --primary: 142 86% 28%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 217 19% 9%;
+    --secondary: 210 40% 94%;
+    --secondary-foreground: 217 19% 15%;
 
-    --muted: 210 40% 96%;
+    --muted: 210 40% 94%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 210 40% 96%;
-    --accent-foreground: 217 19% 9%;
+    --accent: 210 40% 94%;
+    --accent-foreground: 217 19% 15%;
 
     --destructive: 0 62.8% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
+    --border: 214.3 31.8% 85%;
     --input: 214.3 31.8% 91.4%;
     --ring: 142 86% 28%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 217 19% 9%;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 217 19% 15%;
     --sidebar-primary: 142 86% 28%;
     --sidebar-primary-foreground: 210 40% 98%;
-    --sidebar-accent: 210 40% 96%;
-    --sidebar-accent-foreground: 217 19% 9%;
-    --sidebar-border: 214.3 31.8% 91.4%;
+    --sidebar-accent: 210 40% 94%;
+    --sidebar-accent-foreground: 217 19% 15%;
+    --sidebar-border: 214.3 31.8% 85%;
     --sidebar-ring: 142 86% 28%;
   }
 
@@ -99,48 +99,54 @@
     font-family: "Inter", system-ui, -apple-system, sans-serif;
   }
 
-  /* Scrollbar personalizada para ambos os temas */
+  /* Scrollbar personalizada para modo dark */
+  .dark ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .dark ::-webkit-scrollbar-track {
+    @apply bg-muted;
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/30 rounded-full;
+  }
+
+  .dark ::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/50;
+  }
+
+  /* Scrollbar para modo light */
   ::-webkit-scrollbar {
     width: 8px;
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-muted;
+    background: rgb(248 250 252);
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-muted-foreground/30 rounded-full;
+    background: rgb(148 163 184 / 0.4);
+    border-radius: 9999px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-muted-foreground/50;
-  }
-
-  /* Scrollbar para modo light */
-  .light ::-webkit-scrollbar-track {
-    @apply bg-muted;
-  }
-
-  .light ::-webkit-scrollbar-thumb {
-    @apply bg-muted-foreground/40 rounded-full;
-  }
-
-  .light ::-webkit-scrollbar-thumb:hover {
-    @apply bg-muted-foreground/60;
+    background: rgb(148 163 184 / 0.6);
   }
 }
 
 @layer components {
-  .glass-effect {
+  /* Glass effect para modo dark */
+  .dark .glass-effect {
     backdrop-filter: blur(12px);
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   /* Glass effect para modo light */
-  .light .glass-effect {
+  .glass-effect {
     backdrop-filter: blur(12px);
-    background: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.8);
     border: 1px solid rgba(0, 0, 0, 0.1);
   }
 }
