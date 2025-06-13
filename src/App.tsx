@@ -8,8 +8,6 @@ import { VIPProvider } from "@/contexts/VIPContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import Header from "@/components/Header";
 import Navigation from "@/components/Navigation";
-import PWAInstallPrompt from "@/components/PWAInstallPrompt";
-import PWAOfflineIndicator from "@/components/PWAOfflineIndicator";
 import Dashboard from "@/pages/Dashboard";
 import VIPList from "@/pages/VIPList";
 import AddVIP from "@/pages/AddVIP";
@@ -26,11 +24,10 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <div className="min-h-screen min-h-dvh bg-background text-foreground transition-colors duration-300 w-full pwa-safe-area">
-              <PWAOfflineIndicator />
+            <div className="min-h-screen bg-background text-foreground transition-colors duration-300 w-full">
               <Header />
               <Navigation />
-              <main className="container mx-auto px-4 md:px-6 py-4 md:py-8 pb-20 md:pb-8">
+              <main className="container mx-auto px-4 md:px-6 py-4 md:py-8">
                 <Routes>
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/vips" element={<VIPList />} />
@@ -39,7 +36,6 @@ const App = () => (
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
-              <PWAInstallPrompt />
             </div>
           </BrowserRouter>
         </VIPProvider>

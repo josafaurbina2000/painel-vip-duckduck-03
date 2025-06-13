@@ -25,12 +25,10 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   return (
     <NextThemeProvider
       attribute="class"
-      defaultTheme="light"
+      defaultTheme="dark"
       enableSystem={false}
       disableTransitionOnChange={false}
       themes={['light', 'dark']}
-      storageKey="vip-panel-theme"
-      forcedTheme={undefined}
     >
       {children}
     </NextThemeProvider>
