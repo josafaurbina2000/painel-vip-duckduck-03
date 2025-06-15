@@ -29,6 +29,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
   const [isDragOver, setIsDragOver] = useState(false);
   const [pendingFile, setPendingFile] = useState<VIPFile | null>(null);
   const [isRemoving, setIsRemoving] = useState(false);
+  const [autoSaveFailed, setAutoSaveFailed] = useState(false);
   const { toast } = useToast();
   const { uploadFile, deleteFile, isUploading } = useStorageUpload();
 
@@ -61,6 +62,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
     console.log('Arquivo selecionado:', file.name, file.type, file.size);
     if (!validateFile(file)) return;
 
+    setAutoSaveFailed(false);
+
     try {
       // Upload para o Supabase Storage
       const storageFile = await uploadFile(file);
@@ -77,12 +80,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
       console.log('Arquivo carregado para storage:', vipFile);
 
       if (isEditMode && onAutoSave) {
-        // Em modo de edição, auto-salvar
+        // Em modo de edição, tentar auto-salvar
         setPendingFile(vipFile);
-        toast({
-          title: "Salvando comprovante...",
-          description: "Aguarde enquanto o arquivo é salvo.",
-        });
         
         try {
           await onAutoSave(vipFile);
@@ -90,28 +89,28 @@ const FileUpload: React.FC<FileUploadProps> = ({
           onFileSelect(vipFile);
           toast({
             title: "Comprovante salvo!",
-            description: `${file.name} foi salvo no banco de dados.`,
+            description: `${file.name} foi salvo automaticamente.`,
           });
         } catch (error) {
           console.error('Erro ao salvar automaticamente:', error);
-          // Se falhar ao salvar no banco, remover do storage
-          if (vipFile.path) {
-            await deleteFile(vipFile.path);
-          }
+          setAutoSaveFailed(true);
           setPendingFile(null);
+          
+          // Manter o arquivo carregado mesmo se o auto-save falhar
+          onFileSelect(vipFile);
+          
           toast({
-            title: "Erro ao salvar",
-            description: "Não foi possível salvar automaticamente. Use o botão Atualizar VIP.",
+            title: "Arquivo carregado",
+            description: "O arquivo foi carregado, mas não foi possível salvar automaticamente. Clique em 'Atualizar VIP' para salvar as alterações.",
             variant: "destructive",
           });
-          onFileSelect(vipFile);
         }
       } else {
         // Modo de criação, apenas selecionar
         onFileSelect(vipFile);
         toast({
           title: "Arquivo carregado",
-          description: `${file.name} foi carregado. ${isEditMode ? 'Clique em "Atualizar VIP" para salvar.' : 'Clique em "Adicionar VIP" para salvar.'}`,
+          description: `${file.name} foi carregado. Clique em "Adicionar VIP" para salvar.`,
         });
       }
     } catch (error) {
@@ -153,14 +152,11 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
   const removeFile = async () => {
     console.log('Removendo arquivo');
+    setAutoSaveFailed(false);
     
     if (isEditMode && onAutoRemove && currentFile) {
-      // Em modo de edição, auto-remover do banco
+      // Em modo de edição, tentar auto-remover do banco
       setIsRemoving(true);
-      toast({
-        title: "Removendo comprovante...",
-        description: "Aguarde enquanto o arquivo é removido do banco.",
-      });
       
       try {
         await onAutoRemove();
@@ -174,13 +170,18 @@ const FileUpload: React.FC<FileUploadProps> = ({
         onFileSelect(null);
         toast({
           title: "Comprovante removido!",
-          description: "O comprovante foi removido do banco de dados.",
+          description: "O comprovante foi removido automaticamente.",
         });
       } catch (error) {
         console.error('Erro ao remover automaticamente:', error);
+        setAutoSaveFailed(true);
+        
+        // Mesmo com erro no auto-remove, permitir remoção local
+        onFileSelect(null);
+        
         toast({
-          title: "Erro ao remover",
-          description: "Não foi possível remover automaticamente. Use o botão Atualizar VIP.",
+          title: "Arquivo removido",
+          description: "O arquivo foi removido localmente, mas não foi possível salvar automaticamente. Clique em 'Atualizar VIP' para salvar as alterações.",
           variant: "destructive",
         });
       } finally {
@@ -199,7 +200,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
       onFileSelect(null);
       toast({
         title: "Arquivo removido",
-        description: isEditMode ? "Use o botão 'Atualizar VIP' para salvar a remoção." : "O comprovante foi removido.",
+        description: isEditMode ? "Clique em 'Atualizar VIP' para salvar a remoção." : "O comprovante foi removido.",
       });
     }
   };
@@ -223,7 +224,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
   };
 
   const displayFile = pendingFile || currentFile;
-  const isFileSaved = currentFile && !pendingFile;
+  const isFileSaved = currentFile && !pendingFile && !autoSaveFailed;
   const isFilePending = pendingFile !== null;
   const isProcessing = isUploading || isSaving || isRemoving;
 
@@ -233,12 +234,14 @@ const FileUpload: React.FC<FileUploadProps> = ({
         {label}
         {isFileSaved && <CheckCircle className="w-4 h-4 text-green-500" />}
         {isFilePending && <Save className="w-4 h-4 text-blue-500 animate-pulse" />}
+        {autoSaveFailed && <X className="w-4 h-4 text-red-500" />}
       </Label>
       
       {displayFile ? (
         <div className={`border rounded-lg p-4 ${
           isFileSaved ? 'border-green-200 bg-green-50/50' : 
           isFilePending ? 'border-blue-200 bg-blue-50/50' : 
+          autoSaveFailed ? 'border-red-200 bg-red-50/50' :
           'border-border bg-card/50'
         }`}>
           <div className="flex items-center justify-between">
@@ -250,14 +253,16 @@ const FileUpload: React.FC<FileUploadProps> = ({
                   {isFileSaved && <CheckCircle className="w-4 h-4 text-green-500" />}
                   {isFilePending && <Save className="w-4 h-4 text-blue-500 animate-pulse" />}
                   {isProcessing && <Save className="w-4 h-4 text-orange-500 animate-spin" />}
+                  {autoSaveFailed && <X className="w-4 h-4 text-red-500" />}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {formatFileSize(displayFile.size)}
-                  {isFileSaved && <span className="text-green-600 ml-2">• Salvo no storage</span>}
+                  {isFileSaved && <span className="text-green-600 ml-2">• Salvo automaticamente</span>}
                   {isFilePending && <span className="text-blue-600 ml-2">• Salvando...</span>}
                   {isRemoving && <span className="text-orange-600 ml-2">• Removendo...</span>}
                   {isUploading && <span className="text-blue-600 ml-2">• Carregando...</span>}
-                  {!isFileSaved && !isFilePending && !isProcessing && (
+                  {autoSaveFailed && <span className="text-red-600 ml-2">• Use o botão Atualizar VIP</span>}
+                  {!isFileSaved && !isFilePending && !isProcessing && !autoSaveFailed && (
                     <span className="text-amber-600 ml-2">• Não salvo</span>
                   )}
                 </p>
