@@ -9,7 +9,7 @@ const Header = () => {
               
             </div>
             <div>
-              <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">Painel VIP - DUCK DUCK</h1>
+              <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-slate-200">Painel VIP - DUCK DUCK</h1>
               <p className="text-xs md:text-sm text-muted-foreground">
                 Sistema de Gerenciamento
               </p>
