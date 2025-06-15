@@ -8,7 +8,33 @@ import { useToast } from '@/hooks/use-toast';
 export const useVIPs = () => {
   const [vips, setVips] = useState<VIP[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
   const { toast } = useToast();
+
+  // Check authentication state
+  useEffect(() => {
+    const getSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+    };
+
+    getSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setUser(session?.user ?? null);
+        if (event === 'SIGNED_IN') {
+          setTimeout(() => {
+            fetchVIPs();
+          }, 0);
+        } else if (event === 'SIGNED_OUT') {
+          setVips([]);
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   // Função para converter dados do Supabase para o tipo VIP
   const convertSupabaseToVIP = (data: any): VIP => {
@@ -43,6 +69,12 @@ export const useVIPs = () => {
   // Carregar VIPs do Supabase
   const fetchVIPs = async () => {
     try {
+      if (!user) {
+        setVips([]);
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(true);
       const { data, error } = await supabase
         .from('vips')
@@ -68,7 +100,12 @@ export const useVIPs = () => {
   // Adicionar novo VIP
   const addVIP = async (newVipData: Omit<VIP, 'id' | 'status'>) => {
     try {
+      if (!user) {
+        throw new Error('Usuário não autenticado');
+      }
+
       const insertData = {
+        user_id: user.id,
         player_name: newVipData.playerName,
         start_date: newVipData.startDate.toISOString(),
         end_date: newVipData.endDate.toISOString(),
@@ -113,6 +150,10 @@ export const useVIPs = () => {
   // Atualizar VIP
   const updateVIP = async (id: string, updates: Partial<VIP>) => {
     try {
+      if (!user) {
+        throw new Error('Usuário não autenticado');
+      }
+
       console.log('Atualizando VIP:', id, 'com dados:', updates);
       
       // Validar se o VIP existe
@@ -210,6 +251,10 @@ export const useVIPs = () => {
   // Deletar VIP
   const deleteVIP = async (id: string) => {
     try {
+      if (!user) {
+        throw new Error('Usuário não autenticado');
+      }
+
       const { error } = await supabase
         .from('vips')
         .delete()
@@ -242,6 +287,10 @@ export const useVIPs = () => {
   // Limpar todos os dados
   const clearAllData = async () => {
     try {
+      if (!user) {
+        throw new Error('Usuário não autenticado');
+      }
+
       const { error } = await supabase
         .from('vips')
         .delete()
@@ -266,12 +315,15 @@ export const useVIPs = () => {
   };
 
   useEffect(() => {
-    fetchVIPs();
-  }, []);
+    if (user) {
+      fetchVIPs();
+    }
+  }, [user]);
 
   return {
     vips,
     isLoading,
+    user,
     addVIP,
     updateVIP,
     deleteVIP,

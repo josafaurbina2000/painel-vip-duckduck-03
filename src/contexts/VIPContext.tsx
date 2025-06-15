@@ -6,6 +6,7 @@ import { useVIPs } from '@/hooks/useVIPs';
 interface VIPContextType {
   vips: VIP[];
   isLoading: boolean;
+  user: any;
   addVIP: (vip: Omit<VIP, 'id' | 'status'>) => Promise<VIP>;
   updateVIP: (id: string, updates: Partial<VIP>) => Promise<VIP>;
   deleteVIP: (id: string) => Promise<void>;
