@@ -1,7 +1,6 @@
 
 import { Crown } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
-import AuthButton from "@/components/AuthButton";
 
 const Header = () => {
   return (
@@ -24,7 +23,6 @@ const Header = () => {
           </div>
           
           <div className="flex items-center space-x-2">
-            <AuthButton />
             <ThemeToggle />
           </div>
         </div>
