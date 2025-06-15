@@ -1,4 +1,3 @@
-
 import React, { useCallback, useState } from 'react';
 import { Upload, File, X, Image, FileText, CheckCircle, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -101,8 +100,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
           
           toast({
             title: "Arquivo carregado",
-            description: "O arquivo foi carregado, mas não foi possível salvar automaticamente. Clique em 'Atualizar VIP' para salvar as alterações.",
-            variant: "destructive",
+            description: "O arquivo foi carregado com sucesso. Para salvar definitivamente, clique em 'Atualizar VIP'.",
+            variant: "default",
           });
         }
       } else {
@@ -180,9 +179,9 @@ const FileUpload: React.FC<FileUploadProps> = ({
         onFileSelect(null);
         
         toast({
-          title: "Arquivo removido",
-          description: "O arquivo foi removido localmente, mas não foi possível salvar automaticamente. Clique em 'Atualizar VIP' para salvar as alterações.",
-          variant: "destructive",
+          title: "Arquivo removido localmente",
+          description: "Para confirmar a remoção, clique em 'Atualizar VIP'.",
+          variant: "default",
         });
       } finally {
         setIsRemoving(false);
@@ -241,7 +240,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
         <div className={`border rounded-lg p-4 ${
           isFileSaved ? 'border-green-200 bg-green-50/50' : 
           isFilePending ? 'border-blue-200 bg-blue-50/50' : 
-          autoSaveFailed ? 'border-red-200 bg-red-50/50' :
+          autoSaveFailed ? 'border-yellow-200 bg-yellow-50/50' :
           'border-border bg-card/50'
         }`}>
           <div className="flex items-center justify-between">
@@ -253,17 +252,17 @@ const FileUpload: React.FC<FileUploadProps> = ({
                   {isFileSaved && <CheckCircle className="w-4 h-4 text-green-500" />}
                   {isFilePending && <Save className="w-4 h-4 text-blue-500 animate-pulse" />}
                   {isProcessing && <Save className="w-4 h-4 text-orange-500 animate-spin" />}
-                  {autoSaveFailed && <X className="w-4 h-4 text-red-500" />}
+                  {autoSaveFailed && <X className="w-4 h-4 text-amber-500" />}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {formatFileSize(displayFile.size)}
-                  {isFileSaved && <span className="text-green-600 ml-2">• Salvo automaticamente</span>}
+                  {isFileSaved && <span className="text-green-600 ml-2">• Salvo no banco</span>}
                   {isFilePending && <span className="text-blue-600 ml-2">• Salvando...</span>}
                   {isRemoving && <span className="text-orange-600 ml-2">• Removendo...</span>}
                   {isUploading && <span className="text-blue-600 ml-2">• Carregando...</span>}
-                  {autoSaveFailed && <span className="text-red-600 ml-2">• Use o botão Atualizar VIP</span>}
+                  {autoSaveFailed && <span className="text-amber-600 ml-2">• Clique em 'Atualizar VIP'</span>}
                   {!isFileSaved && !isFilePending && !isProcessing && !autoSaveFailed && (
-                    <span className="text-amber-600 ml-2">• Não salvo</span>
+                    <span className="text-amber-600 ml-2">• Aguardando salvamento</span>
                   )}
                 </p>
               </div>

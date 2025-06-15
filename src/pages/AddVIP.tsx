@@ -73,6 +73,7 @@ const AddVIP = () => {
       const updatedVIP = getVIPById(editId);
       if (updatedVIP) {
         setCurrentVIP(updatedVIP);
+        setFormData(prev => ({ ...prev, paymentProof: file }));
       }
     } catch (error) {
       console.error('Erro no auto-save do comprovante:', error);
@@ -96,6 +97,7 @@ const AddVIP = () => {
       const updatedVIP = getVIPById(editId);
       if (updatedVIP) {
         setCurrentVIP(updatedVIP);
+        setFormData(prev => ({ ...prev, paymentProof: null }));
       }
     } catch (error) {
       console.error('Erro no auto-remove do comprovante:', error);
@@ -112,43 +114,34 @@ const AddVIP = () => {
     try {
       console.log('Dados do formulário antes da validação:', formData);
 
-      // Validações básicas
+      // Validações básicas com mensagens mais claras
       if (!formData.playerName.trim()) {
-        toast({
-          title: "Erro",
-          description: "Nome do jogador é obrigatório.",
-          variant: "destructive",
-        });
-        return;
+        throw new Error("Nome do jogador é obrigatório.");
       }
 
-      if (!formData.amountPaid || parseFloat(formData.amountPaid) <= 0) {
-        toast({
-          title: "Erro",
-          description: "Valor pago deve ser maior que zero.",
-          variant: "destructive",
-        });
-        return;
+      const amountPaid = parseFloat(formData.amountPaid);
+      if (!formData.amountPaid || isNaN(amountPaid) || amountPaid <= 0) {
+        throw new Error("Valor pago deve ser maior que zero.");
       }
 
-      if (!formData.durationDays || parseInt(formData.durationDays) <= 0) {
-        toast({
-          title: "Erro",
-          description: "Duração em dias é obrigatória.",
-          variant: "destructive",
-        });
-        return;
+      const durationDays = parseInt(formData.durationDays);
+      if (!formData.durationDays || isNaN(durationDays) || durationDays <= 0) {
+        throw new Error("Duração em dias é obrigatória e deve ser maior que zero.");
       }
 
       const startDate = new Date(formData.startDate);
-      const endDate = new Date(startDate.getTime() + parseInt(formData.durationDays) * 24 * 60 * 60 * 1000);
+      if (isNaN(startDate.getTime())) {
+        throw new Error("Data de início inválida.");
+      }
+
+      const endDate = new Date(startDate.getTime() + durationDays * 24 * 60 * 60 * 1000);
 
       const vipData = {
         playerName: formData.playerName.trim(),
-        amountPaid: parseFloat(formData.amountPaid),
+        amountPaid: amountPaid,
         startDate,
         endDate,
-        durationDays: parseInt(formData.durationDays),
+        durationDays: durationDays,
         paymentProof: formData.paymentProof,
         observations: formData.observations.trim(),
         createdAt: editId ? getVIPById(editId)?.createdAt || new Date() : new Date()
@@ -167,7 +160,12 @@ const AddVIP = () => {
       navigate("/vips");
     } catch (error) {
       console.error('Erro ao salvar VIP:', error);
-      // Error toast já é mostrado pelo hook
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido ao salvar VIP';
+      toast({
+        title: "Erro ao salvar",
+        description: errorMessage,
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }

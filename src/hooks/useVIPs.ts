@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { VIP, VIPFile } from '@/types/vip';
@@ -121,16 +120,23 @@ export const useVIPs = () => {
     try {
       console.log('Atualizando VIP:', id, 'com dados:', updates);
       
+      // Validar se o VIP existe
+      const currentVIP = vips.find(v => v.id === id);
+      if (!currentVIP) {
+        throw new Error('VIP não encontrado');
+      }
+      
       const updateData: any = {};
       
-      if (updates.playerName !== undefined) updateData.player_name = updates.playerName;
+      // Mapear os campos corretamente
+      if (updates.playerName !== undefined) updateData.player_name = updates.playerName.trim();
       if (updates.startDate !== undefined) updateData.start_date = updates.startDate.toISOString();
       if (updates.endDate !== undefined) updateData.end_date = updates.endDate.toISOString();
-      if (updates.durationDays !== undefined) updateData.duration_days = updates.durationDays;
-      if (updates.amountPaid !== undefined) updateData.amount_paid = updates.amountPaid;
-      if (updates.observations !== undefined) updateData.observations = updates.observations || null;
+      if (updates.durationDays !== undefined) updateData.duration_days = Number(updates.durationDays);
+      if (updates.amountPaid !== undefined) updateData.amount_paid = Number(updates.amountPaid);
+      if (updates.observations !== undefined) updateData.observations = updates.observations?.trim() || null;
       
-      // Corrigir a lógica do comprovante de pagamento
+      // Tratar comprovante de pagamento
       if (updates.hasOwnProperty('paymentProof')) {
         console.log('Atualizando comprovante de pagamento:', updates.paymentProof);
         if (updates.paymentProof) {
@@ -152,11 +158,21 @@ export const useVIPs = () => {
         }
       }
 
-      // Recalcular status
-      const currentVIP = vips.find(v => v.id === id);
-      if (currentVIP) {
+      // Recalcular status se necessário
+      if (updates.startDate || updates.endDate) {
         const updatedVIP = { ...currentVIP, ...updates };
         updateData.status = calculateVIPStatus(updatedVIP);
+      }
+
+      // Validar dados antes de enviar
+      if (updateData.player_name !== undefined && !updateData.player_name) {
+        throw new Error('Nome do jogador é obrigatório');
+      }
+      if (updateData.amount_paid !== undefined && (isNaN(updateData.amount_paid) || updateData.amount_paid <= 0)) {
+        throw new Error('Valor pago deve ser um número maior que zero');
+      }
+      if (updateData.duration_days !== undefined && (isNaN(updateData.duration_days) || updateData.duration_days <= 0)) {
+        throw new Error('Duração deve ser um número maior que zero');
       }
 
       console.log('Dados que serão enviados para o Supabase:', updateData);
@@ -170,7 +186,11 @@ export const useVIPs = () => {
 
       if (error) {
         console.error('Erro do Supabase ao atualizar:', error);
-        throw error;
+        throw new Error(`Erro do banco de dados: ${error.message}`);
+      }
+
+      if (!data) {
+        throw new Error('Nenhum dado retornado após atualização');
       }
 
       console.log('VIP atualizado no Supabase:', data);
@@ -186,9 +206,10 @@ export const useVIPs = () => {
       return updatedVIP;
     } catch (error) {
       console.error('Erro ao atualizar VIP:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
       toast({
-        title: "Erro",
-        description: "Não foi possível atualizar o VIP no banco de dados.",
+        title: "Erro ao atualizar",
+        description: `Não foi possível atualizar o VIP: ${errorMessage}`,
         variant: "destructive",
       });
       throw error;
