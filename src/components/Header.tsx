@@ -1,6 +1,6 @@
 
 import { Crown } from "lucide-react";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import ThemeToggle from "@/components/ThemeToggle";
 import AuthButton from "@/components/AuthButton";
 
 const Header = () => {
