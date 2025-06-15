@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Calendar, DollarSign, FileText, User, ArrowLeft } from "lucide-react";
@@ -48,6 +47,7 @@ const AddVIP = () => {
   }, [editId, getVIPById, contextLoading]);
 
   const handleInputChange = (field: string, value: string | VIPFile | null) => {
+    console.log('Campo alterado:', field, value);
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -59,6 +59,8 @@ const AddVIP = () => {
     setIsLoading(true);
 
     try {
+      console.log('Dados do formulário antes da validação:', formData);
+
       // Validações básicas
       if (!formData.playerName.trim()) {
         toast({
@@ -101,16 +103,20 @@ const AddVIP = () => {
         createdAt: editId ? getVIPById(editId)?.createdAt || new Date() : new Date()
       };
 
+      console.log('Dados que serão salvos:', vipData);
+
       if (editId) {
+        console.log('Atualizando VIP existente:', editId);
         await updateVIP(editId, vipData);
       } else {
+        console.log('Criando novo VIP');
         await addVIP(vipData);
       }
 
       navigate("/vips");
     } catch (error) {
-      // Error toast já é mostrado pelo hook
       console.error('Erro ao salvar VIP:', error);
+      // Error toast já é mostrado pelo hook
     } finally {
       setIsLoading(false);
     }
@@ -288,7 +294,7 @@ const AddVIP = () => {
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Comprovante</span>
                     <span className="font-medium">
-                      {formData.paymentProof ? "Anexado" : "—"}
+                      {formData.paymentProof ? "✅ Anexado" : "❌ Não anexado"}
                     </span>
                   </div>
                 </div>

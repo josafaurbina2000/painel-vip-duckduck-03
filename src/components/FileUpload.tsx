@@ -1,6 +1,5 @@
-
 import React, { useCallback, useState } from 'react';
-import { Upload, File, X, Image, FileText } from 'lucide-react';
+import { Upload, File, X, Image, FileText, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { VIPFile } from '@/types/vip';
@@ -51,6 +50,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, currentFile, labe
   };
 
   const handleFileSelect = async (file: File) => {
+    console.log('Arquivo selecionado:', file.name, file.type, file.size);
     if (!validateFile(file)) return;
 
     try {
@@ -61,12 +61,14 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, currentFile, labe
         size: file.size,
         data: base64Data
       };
+      console.log('Arquivo convertido para VIPFile:', vipFile.name);
       onFileSelect(vipFile);
       toast({
         title: "Arquivo carregado",
         description: `${file.name} foi carregado com sucesso.`,
       });
     } catch (error) {
+      console.error('Erro ao processar arquivo:', error);
       toast({
         title: "Erro",
         description: "Erro ao processar o arquivo. Tente novamente.",
@@ -103,7 +105,12 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, currentFile, labe
   };
 
   const removeFile = () => {
+    console.log('Removendo arquivo');
     onFileSelect(null);
+    toast({
+      title: "Arquivo removido",
+      description: "O comprovante de pagamento foi removido.",
+    });
   };
 
   const formatFileSize = (bytes: number) => {
@@ -126,7 +133,10 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, currentFile, labe
 
   return (
     <div className="space-y-4">
-      <Label>{label}</Label>
+      <Label className="flex items-center gap-2">
+        {label}
+        {currentFile && <CheckCircle className="w-4 h-4 text-green-500" />}
+      </Label>
       
       {currentFile ? (
         <div className="border border-border rounded-lg p-4 bg-card/50">
@@ -134,7 +144,10 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, currentFile, labe
             <div className="flex items-center gap-3">
               {getFileIcon(currentFile.type)}
               <div>
-                <p className="font-medium text-sm">{currentFile.name}</p>
+                <p className="font-medium text-sm flex items-center gap-2">
+                  {currentFile.name}
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                </p>
                 <p className="text-xs text-muted-foreground">
                   {formatFileSize(currentFile.size)}
                 </p>

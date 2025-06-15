@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { VIP, VIPFile } from '@/types/vip';
@@ -113,19 +112,33 @@ export const useVIPs = () => {
   // Atualizar VIP
   const updateVIP = async (id: string, updates: Partial<VIP>) => {
     try {
+      console.log('Atualizando VIP:', id, 'com dados:', updates);
+      
       const updateData: any = {};
       
-      if (updates.playerName) updateData.player_name = updates.playerName;
-      if (updates.startDate) updateData.start_date = updates.startDate.toISOString();
-      if (updates.endDate) updateData.end_date = updates.endDate.toISOString();
-      if (updates.durationDays) updateData.duration_days = updates.durationDays;
+      if (updates.playerName !== undefined) updateData.player_name = updates.playerName;
+      if (updates.startDate !== undefined) updateData.start_date = updates.startDate.toISOString();
+      if (updates.endDate !== undefined) updateData.end_date = updates.endDate.toISOString();
+      if (updates.durationDays !== undefined) updateData.duration_days = updates.durationDays;
       if (updates.amountPaid !== undefined) updateData.amount_paid = updates.amountPaid;
       if (updates.observations !== undefined) updateData.observations = updates.observations || null;
-      if (updates.paymentProof !== undefined) {
-        updateData.payment_proof_name = updates.paymentProof?.name || null;
-        updateData.payment_proof_type = updates.paymentProof?.type || null;
-        updateData.payment_proof_size = updates.paymentProof?.size || null;
-        updateData.payment_proof_data = updates.paymentProof?.data || null;
+      
+      // Corrigir a lógica do comprovante de pagamento
+      if (updates.hasOwnProperty('paymentProof')) {
+        console.log('Atualizando comprovante de pagamento:', updates.paymentProof);
+        if (updates.paymentProof) {
+          // Adicionando ou atualizando comprovante
+          updateData.payment_proof_name = updates.paymentProof.name;
+          updateData.payment_proof_type = updates.paymentProof.type;
+          updateData.payment_proof_size = updates.paymentProof.size;
+          updateData.payment_proof_data = updates.paymentProof.data;
+        } else {
+          // Removendo comprovante
+          updateData.payment_proof_name = null;
+          updateData.payment_proof_type = null;
+          updateData.payment_proof_size = null;
+          updateData.payment_proof_data = null;
+        }
       }
 
       // Recalcular status
@@ -135,6 +148,8 @@ export const useVIPs = () => {
         updateData.status = calculateVIPStatus(updatedVIP);
       }
 
+      console.log('Dados que serão enviados para o Supabase:', updateData);
+
       const { data, error } = await supabase
         .from('vips')
         .update(updateData)
@@ -142,7 +157,12 @@ export const useVIPs = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro do Supabase ao atualizar:', error);
+        throw error;
+      }
+
+      console.log('VIP atualizado no Supabase:', data);
 
       const updatedVIP = convertSupabaseToVIP(data);
       setVips(prev => prev.map(vip => vip.id === id ? updatedVIP : vip));
