@@ -28,12 +28,17 @@ const AddVIP = () => {
   });
 
   const [isLoading, setIsLoading] = useState(false);
+  const [isSavingProof, setIsSavingProof] = useState(false);
+  const [currentVIP, setCurrentVIP] = useState(null);
 
   // Carregar dados para edição
   useEffect(() => {
     if (editId && !contextLoading) {
       const vip = getVIPById(editId);
       if (vip) {
+        console.log('Carregando VIP para edição:', vip);
+        console.log('Comprovante atual:', vip.paymentProof);
+        setCurrentVIP(vip);
         setFormData({
           playerName: vip.playerName,
           amountPaid: vip.amountPaid.toString(),
@@ -52,6 +57,29 @@ const AddVIP = () => {
       ...prev,
       [field]: value
     }));
+  };
+
+  // Auto-save do comprovante quando em modo de edição
+  const handleAutoSaveProof = async (file: VIPFile) => {
+    if (!editId) return;
+    
+    setIsSavingProof(true);
+    try {
+      console.log('Auto-salvando comprovante para VIP:', editId);
+      await updateVIP(editId, { paymentProof: file });
+      console.log('Comprovante auto-salvo com sucesso');
+      
+      // Atualizar o VIP atual para refletir a mudança
+      const updatedVIP = getVIPById(editId);
+      if (updatedVIP) {
+        setCurrentVIP(updatedVIP);
+      }
+    } catch (error) {
+      console.error('Erro no auto-save do comprovante:', error);
+      throw error;
+    } finally {
+      setIsSavingProof(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -122,6 +150,10 @@ const AddVIP = () => {
     }
   };
 
+  // Determinar se o comprovante está salvo no banco
+  const isProofSavedInDB = currentVIP?.paymentProof !== null && currentVIP?.paymentProof !== undefined;
+  const hasUnsavedChanges = formData.paymentProof !== currentVIP?.paymentProof;
+
   return (
     <div className="max-w-4xl mx-auto space-y-6 animate-fade-in">
       {/* Header */}
@@ -148,6 +180,7 @@ const AddVIP = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Informações do Jogador */}
           <div className="lg:col-span-2 space-y-6">
+            {/* ... keep existing code (player info card) */}
             <Card className="bg-card/50 backdrop-blur-sm border-border">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -170,7 +203,7 @@ const AddVIP = () => {
               </CardContent>
             </Card>
 
-            {/* Informações do VIP */}
+            {/* ... keep existing code (VIP settings card) */}
             <Card className="bg-card/50 backdrop-blur-sm border-border">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -235,7 +268,10 @@ const AddVIP = () => {
 
                 <FileUpload
                   onFileSelect={(file) => handleInputChange("paymentProof", file)}
-                  currentFile={formData.paymentProof}
+                  currentFile={currentVIP?.paymentProof || null}
+                  isEditMode={!!editId}
+                  onAutoSave={handleAutoSaveProof}
+                  isSaving={isSavingProof}
                 />
               </CardContent>
             </Card>
@@ -294,7 +330,13 @@ const AddVIP = () => {
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Comprovante</span>
                     <span className="font-medium">
-                      {formData.paymentProof ? "✅ Anexado" : "❌ Não anexado"}
+                      {isProofSavedInDB ? (
+                        <span className="text-green-600">✅ Salvo no banco</span>
+                      ) : formData.paymentProof ? (
+                        <span className="text-amber-600">⚠️ Não salvo</span>
+                      ) : (
+                        <span className="text-red-600">❌ Não anexado</span>
+                      )}
                     </span>
                   </div>
                 </div>

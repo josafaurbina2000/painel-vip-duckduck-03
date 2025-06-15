@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { Upload, File, X, Image, FileText, CheckCircle } from 'lucide-react';
+import { Upload, File, X, Image, FileText, CheckCircle, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { VIPFile } from '@/types/vip';
@@ -9,10 +9,21 @@ interface FileUploadProps {
   onFileSelect: (file: VIPFile | null) => void;
   currentFile?: VIPFile | null;
   label?: string;
+  isEditMode?: boolean;
+  onAutoSave?: (file: VIPFile) => Promise<void>;
+  isSaving?: boolean;
 }
 
-const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, currentFile, label = "Comprovante de Pagamento" }) => {
+const FileUpload: React.FC<FileUploadProps> = ({ 
+  onFileSelect, 
+  currentFile, 
+  label = "Comprovante de Pagamento",
+  isEditMode = false,
+  onAutoSave,
+  isSaving = false
+}) => {
   const [isDragOver, setIsDragOver] = useState(false);
+  const [pendingFile, setPendingFile] = useState<VIPFile | null>(null);
   const { toast } = useToast();
 
   const validateFile = (file: File): boolean => {
@@ -61,12 +72,43 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, currentFile, labe
         size: file.size,
         data: base64Data
       };
+
       console.log('Arquivo convertido para VIPFile:', vipFile.name);
-      onFileSelect(vipFile);
-      toast({
-        title: "Arquivo carregado",
-        description: `${file.name} foi carregado com sucesso.`,
-      });
+
+      if (isEditMode && onAutoSave) {
+        // Em modo de edição, auto-salvar
+        setPendingFile(vipFile);
+        toast({
+          title: "Salvando comprovante...",
+          description: "Aguarde enquanto o arquivo é salvo.",
+        });
+        
+        try {
+          await onAutoSave(vipFile);
+          setPendingFile(null);
+          onFileSelect(vipFile);
+          toast({
+            title: "Comprovante salvo!",
+            description: `${file.name} foi salvo no banco de dados.`,
+          });
+        } catch (error) {
+          console.error('Erro ao salvar automaticamente:', error);
+          setPendingFile(null);
+          toast({
+            title: "Erro ao salvar",
+            description: "Não foi possível salvar automaticamente. Use o botão Atualizar VIP.",
+            variant: "destructive",
+          });
+          onFileSelect(vipFile);
+        }
+      } else {
+        // Modo de criação, apenas selecionar
+        onFileSelect(vipFile);
+        toast({
+          title: "Arquivo selecionado",
+          description: `${file.name} foi selecionado. ${isEditMode ? 'Clique em "Atualizar VIP" para salvar.' : 'Clique em "Adicionar VIP" para salvar.'}`,
+        });
+      }
     } catch (error) {
       console.error('Erro ao processar arquivo:', error);
       toast({
@@ -106,6 +148,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, currentFile, labe
 
   const removeFile = () => {
     console.log('Removendo arquivo');
+    setPendingFile(null);
     onFileSelect(null);
     toast({
       title: "Arquivo removido",
@@ -131,25 +174,41 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, currentFile, labe
     return <File className="w-8 h-8 text-gray-500" />;
   };
 
+  const displayFile = pendingFile || currentFile;
+  const isFileSaved = currentFile && !pendingFile;
+  const isFilePending = pendingFile !== null;
+
   return (
     <div className="space-y-4">
       <Label className="flex items-center gap-2">
         {label}
-        {currentFile && <CheckCircle className="w-4 h-4 text-green-500" />}
+        {isFileSaved && <CheckCircle className="w-4 h-4 text-green-500" />}
+        {isFilePending && <Save className="w-4 h-4 text-blue-500 animate-pulse" />}
       </Label>
       
-      {currentFile ? (
-        <div className="border border-border rounded-lg p-4 bg-card/50">
+      {displayFile ? (
+        <div className={`border rounded-lg p-4 ${
+          isFileSaved ? 'border-green-200 bg-green-50/50' : 
+          isFilePending ? 'border-blue-200 bg-blue-50/50' : 
+          'border-border bg-card/50'
+        }`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              {getFileIcon(currentFile.type)}
+              {getFileIcon(displayFile.type)}
               <div>
                 <p className="font-medium text-sm flex items-center gap-2">
-                  {currentFile.name}
-                  <CheckCircle className="w-4 h-4 text-green-500" />
+                  {displayFile.name}
+                  {isFileSaved && <CheckCircle className="w-4 h-4 text-green-500" />}
+                  {isFilePending && <Save className="w-4 h-4 text-blue-500 animate-pulse" />}
+                  {isSaving && <Save className="w-4 h-4 text-orange-500 animate-spin" />}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  {formatFileSize(currentFile.size)}
+                  {formatFileSize(displayFile.size)}
+                  {isFileSaved && <span className="text-green-600 ml-2">• Salvo no banco</span>}
+                  {isFilePending && <span className="text-blue-600 ml-2">• Salvando...</span>}
+                  {!isFileSaved && !isFilePending && !isSaving && (
+                    <span className="text-amber-600 ml-2">• Não salvo</span>
+                  )}
                 </p>
               </div>
             </div>
@@ -159,6 +218,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, currentFile, labe
               size="icon"
               onClick={removeFile}
               className="hover:bg-destructive/10 hover:text-destructive"
+              disabled={isSaving}
             >
               <X className="w-4 h-4" />
             </Button>
