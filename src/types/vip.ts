@@ -1,10 +1,9 @@
+
 export interface VIPFile {
   name: string;
   type: string;
   size: number;
-  data?: string; // base64 encoded (mantido para compatibilidade)
-  url?: string;  // URL do Supabase Storage
-  path?: string; // Caminho no storage
+  data: string; // base64 encoded
 }
 
 export interface VIP {

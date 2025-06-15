@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { VIP, VIPFile } from '@/types/vip';
@@ -27,16 +28,12 @@ export const useVIPs = () => {
     };
 
     // Adicionar arquivo se existir
-    if (data.payment_proof_name) {
+    if (data.payment_proof_name && data.payment_proof_data) {
       vip.paymentProof = {
         name: data.payment_proof_name,
         type: data.payment_proof_type,
         size: data.payment_proof_size,
-        // Manter suporte aos dados base64 antigos
-        data: data.payment_proof_data,
-        // Adicionar campos do storage se existirem
-        url: data.payment_proof_url || undefined,
-        path: data.payment_proof_path || undefined
+        data: data.payment_proof_data
       };
     }
 
@@ -82,9 +79,7 @@ export const useVIPs = () => {
         payment_proof_name: newVipData.paymentProof?.name || null,
         payment_proof_type: newVipData.paymentProof?.type || null,
         payment_proof_size: newVipData.paymentProof?.size || null,
-        payment_proof_data: newVipData.paymentProof?.data || null,
-        payment_proof_url: newVipData.paymentProof?.url || null,
-        payment_proof_path: newVipData.paymentProof?.path || null
+        payment_proof_data: newVipData.paymentProof?.data || null
       };
 
       const { data, error } = await supabase
@@ -144,17 +139,13 @@ export const useVIPs = () => {
           updateData.payment_proof_name = updates.paymentProof.name;
           updateData.payment_proof_type = updates.paymentProof.type;
           updateData.payment_proof_size = updates.paymentProof.size;
-          updateData.payment_proof_data = updates.paymentProof.data || null;
-          updateData.payment_proof_url = updates.paymentProof.url || null;
-          updateData.payment_proof_path = updates.paymentProof.path || null;
+          updateData.payment_proof_data = updates.paymentProof.data;
         } else {
           // Removendo comprovante
           updateData.payment_proof_name = null;
           updateData.payment_proof_type = null;
           updateData.payment_proof_size = null;
           updateData.payment_proof_data = null;
-          updateData.payment_proof_url = null;
-          updateData.payment_proof_path = null;
         }
       }
 
@@ -248,7 +239,7 @@ export const useVIPs = () => {
     return vips.find(vip => vip.id === id);
   };
 
-  // Limpar todos os dados (manter para compatibilidade)
+  // Limpar todos os dados
   const clearAllData = async () => {
     try {
       const { error } = await supabase
