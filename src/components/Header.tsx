@@ -1,4 +1,3 @@
-
 import ThemeToggle from "@/components/ThemeToggle";
 const Header = () => {
   return <header className="border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
@@ -7,7 +6,7 @@ const Header = () => {
           <div className="flex items-center space-x-3">
             <div className="relative">
               <img alt="Duck Duck Logo" className="h-8 w-8 my-0 object-contain rounded-sm" src="/lovable-uploads/ad7c537a-9477-48ca-9d69-9b273290f4b9.png" />
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full"></div>
+              
             </div>
             <div>
               <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">Painel VIP - DUCK DUCK</h1>
