@@ -13,7 +13,8 @@ interface FileViewerProps {
 const FileViewer: React.FC<FileViewerProps> = ({ file, showInline = false }) => {
   const handleDownload = () => {
     const link = document.createElement('a');
-    link.href = file.data;
+    // Usar URL do storage se disponível, senão usar data base64
+    link.href = file.url || file.data || '';
     link.download = file.name;
     document.body.appendChild(link);
     link.click();
@@ -21,10 +22,21 @@ const FileViewer: React.FC<FileViewerProps> = ({ file, showInline = false }) => 
   };
 
   const renderFileContent = () => {
+    // Usar URL do storage se disponível
+    const fileSource = file.url || file.data;
+    
+    if (!fileSource) {
+      return (
+        <div className="p-8 text-center">
+          <p className="text-muted-foreground">Arquivo não disponível.</p>
+        </div>
+      );
+    }
+
     if (file.type === 'application/pdf') {
       return (
         <iframe
-          src={file.data}
+          src={fileSource}
           className="w-full h-96 border rounded-lg"
           title={file.name}
         />
@@ -34,7 +46,7 @@ const FileViewer: React.FC<FileViewerProps> = ({ file, showInline = false }) => 
     if (file.type.startsWith('image/')) {
       return (
         <img
-          src={file.data}
+          src={fileSource}
           alt={file.name}
           className="max-w-full h-auto rounded-lg"
         />

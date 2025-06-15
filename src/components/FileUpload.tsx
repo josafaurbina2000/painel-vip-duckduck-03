@@ -1,9 +1,11 @@
+
 import React, { useCallback, useState } from 'react';
 import { Upload, File, X, Image, FileText, CheckCircle, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { VIPFile } from '@/types/vip';
 import { useToast } from '@/hooks/use-toast';
+import { useStorageUpload } from '@/hooks/useStorageUpload';
 
 interface FileUploadProps {
   onFileSelect: (file: VIPFile | null) => void;
@@ -28,6 +30,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
   const [pendingFile, setPendingFile] = useState<VIPFile | null>(null);
   const [isRemoving, setIsRemoving] = useState(false);
   const { toast } = useToast();
+  const { uploadFile, deleteFile, isUploading } = useStorageUpload();
 
   const validateFile = (file: File): boolean => {
     const allowedTypes = ['image/png', 'application/pdf'];
@@ -54,29 +57,24 @@ const FileUpload: React.FC<FileUploadProps> = ({
     return true;
   };
 
-  const convertToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  };
-
   const handleFileSelect = async (file: File) => {
     console.log('Arquivo selecionado:', file.name, file.type, file.size);
     if (!validateFile(file)) return;
 
     try {
-      const base64Data = await convertToBase64(file);
+      // Upload para o Supabase Storage
+      const storageFile = await uploadFile(file);
+      if (!storageFile) return;
+
       const vipFile: VIPFile = {
-        name: file.name,
-        type: file.type,
-        size: file.size,
-        data: base64Data
+        name: storageFile.name,
+        type: storageFile.type,
+        size: storageFile.size,
+        url: storageFile.url,
+        path: storageFile.path
       };
 
-      console.log('Arquivo convertido para VIPFile:', vipFile.name);
+      console.log('Arquivo carregado para storage:', vipFile);
 
       if (isEditMode && onAutoSave) {
         // Em modo de edição, auto-salvar
@@ -96,6 +94,10 @@ const FileUpload: React.FC<FileUploadProps> = ({
           });
         } catch (error) {
           console.error('Erro ao salvar automaticamente:', error);
+          // Se falhar ao salvar no banco, remover do storage
+          if (vipFile.path) {
+            await deleteFile(vipFile.path);
+          }
           setPendingFile(null);
           toast({
             title: "Erro ao salvar",
@@ -108,8 +110,8 @@ const FileUpload: React.FC<FileUploadProps> = ({
         // Modo de criação, apenas selecionar
         onFileSelect(vipFile);
         toast({
-          title: "Arquivo selecionado",
-          description: `${file.name} foi selecionado. ${isEditMode ? 'Clique em "Atualizar VIP" para salvar.' : 'Clique em "Adicionar VIP" para salvar.'}`,
+          title: "Arquivo carregado",
+          description: `${file.name} foi carregado. ${isEditMode ? 'Clique em "Atualizar VIP" para salvar.' : 'Clique em "Adicionar VIP" para salvar.'}`,
         });
       }
     } catch (error) {
@@ -162,6 +164,12 @@ const FileUpload: React.FC<FileUploadProps> = ({
       
       try {
         await onAutoRemove();
+        
+        // Remover do storage se tiver path
+        if (currentFile.path) {
+          await deleteFile(currentFile.path);
+        }
+        
         setPendingFile(null);
         onFileSelect(null);
         toast({
@@ -180,6 +188,13 @@ const FileUpload: React.FC<FileUploadProps> = ({
       }
     } else {
       // Modo de criação ou sem auto-remove, apenas remover localmente
+      const fileToRemove = pendingFile || currentFile;
+      
+      // Se o arquivo tem path, remover do storage
+      if (fileToRemove?.path) {
+        await deleteFile(fileToRemove.path);
+      }
+      
       setPendingFile(null);
       onFileSelect(null);
       toast({
@@ -210,6 +225,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
   const displayFile = pendingFile || currentFile;
   const isFileSaved = currentFile && !pendingFile;
   const isFilePending = pendingFile !== null;
+  const isProcessing = isUploading || isSaving || isRemoving;
 
   return (
     <div className="space-y-4">
@@ -233,14 +249,15 @@ const FileUpload: React.FC<FileUploadProps> = ({
                   {displayFile.name}
                   {isFileSaved && <CheckCircle className="w-4 h-4 text-green-500" />}
                   {isFilePending && <Save className="w-4 h-4 text-blue-500 animate-pulse" />}
-                  {(isSaving || isRemoving) && <Save className="w-4 h-4 text-orange-500 animate-spin" />}
+                  {isProcessing && <Save className="w-4 h-4 text-orange-500 animate-spin" />}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {formatFileSize(displayFile.size)}
-                  {isFileSaved && <span className="text-green-600 ml-2">• Salvo no banco</span>}
+                  {isFileSaved && <span className="text-green-600 ml-2">• Salvo no storage</span>}
                   {isFilePending && <span className="text-blue-600 ml-2">• Salvando...</span>}
                   {isRemoving && <span className="text-orange-600 ml-2">• Removendo...</span>}
-                  {!isFileSaved && !isFilePending && !isSaving && !isRemoving && (
+                  {isUploading && <span className="text-blue-600 ml-2">• Carregando...</span>}
+                  {!isFileSaved && !isFilePending && !isProcessing && (
                     <span className="text-amber-600 ml-2">• Não salvo</span>
                   )}
                 </p>
@@ -252,7 +269,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
               size="icon"
               onClick={removeFile}
               className="hover:bg-destructive/10 hover:text-destructive"
-              disabled={isSaving || isRemoving}
+              disabled={isProcessing}
             >
               <X className="w-4 h-4" />
             </Button>
@@ -282,10 +299,11 @@ const FileUpload: React.FC<FileUploadProps> = ({
             onChange={handleInputChange}
             className="hidden"
             id="file-upload"
+            disabled={isUploading}
           />
-          <Button type="button" variant="outline" asChild>
+          <Button type="button" variant="outline" asChild disabled={isUploading}>
             <label htmlFor="file-upload" className="cursor-pointer">
-              Selecionar Arquivo
+              {isUploading ? "Carregando..." : "Selecionar Arquivo"}
             </label>
           </Button>
         </div>

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { VIP, VIPFile } from '@/types/vip';
@@ -32,7 +33,11 @@ export const useVIPs = () => {
         name: data.payment_proof_name,
         type: data.payment_proof_type,
         size: data.payment_proof_size,
-        data: data.payment_proof_data
+        // Manter suporte aos dados base64 antigos
+        data: data.payment_proof_data,
+        // Adicionar campos do storage se existirem
+        url: data.payment_proof_url || undefined,
+        path: data.payment_proof_path || undefined
       };
     }
 
@@ -78,7 +83,9 @@ export const useVIPs = () => {
         payment_proof_name: newVipData.paymentProof?.name || null,
         payment_proof_type: newVipData.paymentProof?.type || null,
         payment_proof_size: newVipData.paymentProof?.size || null,
-        payment_proof_data: newVipData.paymentProof?.data || null
+        payment_proof_data: newVipData.paymentProof?.data || null,
+        payment_proof_url: newVipData.paymentProof?.url || null,
+        payment_proof_path: newVipData.paymentProof?.path || null
       };
 
       const { data, error } = await supabase
@@ -131,13 +138,17 @@ export const useVIPs = () => {
           updateData.payment_proof_name = updates.paymentProof.name;
           updateData.payment_proof_type = updates.paymentProof.type;
           updateData.payment_proof_size = updates.paymentProof.size;
-          updateData.payment_proof_data = updates.paymentProof.data;
+          updateData.payment_proof_data = updates.paymentProof.data || null;
+          updateData.payment_proof_url = updates.paymentProof.url || null;
+          updateData.payment_proof_path = updates.paymentProof.path || null;
         } else {
           // Removendo comprovante
           updateData.payment_proof_name = null;
           updateData.payment_proof_type = null;
           updateData.payment_proof_size = null;
           updateData.payment_proof_data = null;
+          updateData.payment_proof_url = null;
+          updateData.payment_proof_path = null;
         }
       }
 
