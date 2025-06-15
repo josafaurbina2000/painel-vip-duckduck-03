@@ -11,6 +11,7 @@ interface FileUploadProps {
   label?: string;
   isEditMode?: boolean;
   onAutoSave?: (file: VIPFile) => Promise<void>;
+  onAutoRemove?: () => Promise<void>;
   isSaving?: boolean;
 }
 
@@ -20,10 +21,12 @@ const FileUpload: React.FC<FileUploadProps> = ({
   label = "Comprovante de Pagamento",
   isEditMode = false,
   onAutoSave,
+  onAutoRemove,
   isSaving = false
 }) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [pendingFile, setPendingFile] = useState<VIPFile | null>(null);
+  const [isRemoving, setIsRemoving] = useState(false);
   const { toast } = useToast();
 
   const validateFile = (file: File): boolean => {
@@ -146,14 +149,44 @@ const FileUpload: React.FC<FileUploadProps> = ({
     }
   };
 
-  const removeFile = () => {
+  const removeFile = async () => {
     console.log('Removendo arquivo');
-    setPendingFile(null);
-    onFileSelect(null);
-    toast({
-      title: "Arquivo removido",
-      description: "O comprovante de pagamento foi removido.",
-    });
+    
+    if (isEditMode && onAutoRemove && currentFile) {
+      // Em modo de edição, auto-remover do banco
+      setIsRemoving(true);
+      toast({
+        title: "Removendo comprovante...",
+        description: "Aguarde enquanto o arquivo é removido do banco.",
+      });
+      
+      try {
+        await onAutoRemove();
+        setPendingFile(null);
+        onFileSelect(null);
+        toast({
+          title: "Comprovante removido!",
+          description: "O comprovante foi removido do banco de dados.",
+        });
+      } catch (error) {
+        console.error('Erro ao remover automaticamente:', error);
+        toast({
+          title: "Erro ao remover",
+          description: "Não foi possível remover automaticamente. Use o botão Atualizar VIP.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsRemoving(false);
+      }
+    } else {
+      // Modo de criação ou sem auto-remove, apenas remover localmente
+      setPendingFile(null);
+      onFileSelect(null);
+      toast({
+        title: "Arquivo removido",
+        description: isEditMode ? "Use o botão 'Atualizar VIP' para salvar a remoção." : "O comprovante foi removido.",
+      });
+    }
   };
 
   const formatFileSize = (bytes: number) => {
@@ -200,13 +233,14 @@ const FileUpload: React.FC<FileUploadProps> = ({
                   {displayFile.name}
                   {isFileSaved && <CheckCircle className="w-4 h-4 text-green-500" />}
                   {isFilePending && <Save className="w-4 h-4 text-blue-500 animate-pulse" />}
-                  {isSaving && <Save className="w-4 h-4 text-orange-500 animate-spin" />}
+                  {(isSaving || isRemoving) && <Save className="w-4 h-4 text-orange-500 animate-spin" />}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {formatFileSize(displayFile.size)}
                   {isFileSaved && <span className="text-green-600 ml-2">• Salvo no banco</span>}
                   {isFilePending && <span className="text-blue-600 ml-2">• Salvando...</span>}
-                  {!isFileSaved && !isFilePending && !isSaving && (
+                  {isRemoving && <span className="text-orange-600 ml-2">• Removendo...</span>}
+                  {!isFileSaved && !isFilePending && !isSaving && !isRemoving && (
                     <span className="text-amber-600 ml-2">• Não salvo</span>
                   )}
                 </p>
@@ -218,7 +252,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
               size="icon"
               onClick={removeFile}
               className="hover:bg-destructive/10 hover:text-destructive"
-              disabled={isSaving}
+              disabled={isSaving || isRemoving}
             >
               <X className="w-4 h-4" />
             </Button>

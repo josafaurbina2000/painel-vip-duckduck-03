@@ -82,6 +82,29 @@ const AddVIP = () => {
     }
   };
 
+  // Auto-remove do comprovante quando em modo de edição
+  const handleAutoRemoveProof = async () => {
+    if (!editId) return;
+    
+    setIsSavingProof(true);
+    try {
+      console.log('Auto-removendo comprovante para VIP:', editId);
+      await updateVIP(editId, { paymentProof: null });
+      console.log('Comprovante auto-removido com sucesso');
+      
+      // Atualizar o VIP atual para refletir a mudança
+      const updatedVIP = getVIPById(editId);
+      if (updatedVIP) {
+        setCurrentVIP(updatedVIP);
+      }
+    } catch (error) {
+      console.error('Erro no auto-remove do comprovante:', error);
+      throw error;
+    } finally {
+      setIsSavingProof(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -271,6 +294,7 @@ const AddVIP = () => {
                   currentFile={currentVIP?.paymentProof || null}
                   isEditMode={!!editId}
                   onAutoSave={handleAutoSaveProof}
+                  onAutoRemove={handleAutoRemoveProof}
                   isSaving={isSavingProof}
                 />
               </CardContent>
