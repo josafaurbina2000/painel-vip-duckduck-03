@@ -5,7 +5,7 @@ const Header = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="relative">
-              <img alt="Duck Duck Logo" className="h-8 w-8 my-0 object-contain rounded-sm" src="/lovable-uploads/ad7c537a-9477-48ca-9d69-9b273290f4b9.png" />
+              <img alt="Duck Duck Logo" src="/lovable-uploads/94c07cd7-e0e8-4f86-b70e-b733408e84a7.png" className="h-8 w-8 my-0 rounded-sm object-contain" />
               
             </div>
             <div>
