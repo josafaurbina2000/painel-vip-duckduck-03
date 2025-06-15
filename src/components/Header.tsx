@@ -1,12 +1,18 @@
-import { Crown } from "lucide-react";
+
 import ThemeToggle from "@/components/ThemeToggle";
+
 const Header = () => {
-  return <header className="border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+  return (
+    <header className="border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
       <div className="container mx-auto px-4 md:px-6 py-3 md:py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="relative">
-              <Crown className="h-8 w-8 text-primary animate-pulse my-0" />
+              <img 
+                src="/lovable-uploads/ad7c537a-9477-48ca-9d69-9b273290f4b9.png" 
+                alt="Duck Duck Logo" 
+                className="h-8 w-8 animate-pulse my-0 object-contain rounded-sm"
+              />
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full animate-ping"></div>
             </div>
             <div>
@@ -22,6 +28,8 @@ const Header = () => {
           </div>
         </div>
       </div>
-    </header>;
+    </header>
+  );
 };
+
 export default Header;
