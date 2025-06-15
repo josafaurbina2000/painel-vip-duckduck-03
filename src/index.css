@@ -7,7 +7,7 @@
 
 @layer base {
   :root {
-    /* Modo Light */
+    /* Modo Light - mantém as cores atuais */
     --background: 0 0% 98%;
     --foreground: 217 19% 15%;
 
@@ -49,42 +49,42 @@
   }
 
   .dark {
-    /* Modo Dark */
-    --background: 217 19% 9%;
+    /* Modo Dark - cores mais escuras conforme o plano */
+    --background: 217 19% 6%;
     --foreground: 213 31% 91%;
 
-    --card: 217 19% 12%;
+    --card: 217 19% 8%;
     --card-foreground: 213 31% 91%;
 
-    --popover: 217 19% 12%;
+    --popover: 217 19% 8%;
     --popover-foreground: 213 31% 91%;
 
     --primary: 142 86% 28%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 217 19% 18%;
+    --secondary: 217 19% 14%;
     --secondary-foreground: 213 31% 91%;
 
-    --muted: 217 19% 18%;
+    --muted: 217 19% 14%;
     --muted-foreground: 217.9 10.6% 64.9%;
 
-    --accent: 217 19% 18%;
+    --accent: 217 19% 14%;
     --accent-foreground: 213 31% 91%;
 
     --destructive: 0 62.8% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217 19% 18%;
-    --input: 217 19% 18%;
+    --border: 217 19% 12%;
+    --input: 217 19% 12%;
     --ring: 142 86% 28%;
 
-    --sidebar-background: 217 19% 9%;
+    --sidebar-background: 217 19% 6%;
     --sidebar-foreground: 213 31% 91%;
     --sidebar-primary: 142 86% 28%;
     --sidebar-primary-foreground: 210 40% 98%;
-    --sidebar-accent: 217 19% 18%;
+    --sidebar-accent: 217 19% 14%;
     --sidebar-accent-foreground: 213 31% 91%;
-    --sidebar-border: 217 19% 18%;
+    --sidebar-border: 217 19% 12%;
     --sidebar-ring: 142 86% 28%;
   }
 }
@@ -136,11 +136,11 @@
 }
 
 @layer components {
-  /* Glass effect para modo dark */
+  /* Glass effect para modo dark - ajustado para o fundo mais escuro */
   .dark .glass-effect {
     backdrop-filter: blur(12px);
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   /* Glass effect para modo light */
