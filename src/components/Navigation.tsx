@@ -17,23 +17,19 @@ const Navigation = () => {
   }
 
   return (
-    <nav className="border-b border-border bg-card/30 backdrop-blur-sm">
-      <div className="container mx-auto px-6">
-        <div className="flex space-x-8">
+    <nav className="bg-transparent">
+      <div className="container mx-auto px-6 py-2">
+        <div className="pill-nav">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
-                `flex items-center gap-2 px-4 py-4 text-sm font-medium transition-colors hover:text-primary border-b-2 border-transparent hover:border-primary/50 ${
-                  isActive 
-                    ? "text-primary border-primary" 
-                    : "text-muted-foreground"
-                }`
+                `pill-nav-link ${isActive ? "pill-nav-link-active" : ""}`
               }
             >
               <item.icon className="w-4 h-4" />
-              {item.label}
+              <span>{item.label}</span>
             </NavLink>
           ))}
         </div>

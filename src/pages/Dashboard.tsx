@@ -57,36 +57,34 @@ const Dashboard = () => {
       </div>
 
       {/* Cards principais no topo - Receita Total e Total de VIPs */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-        <Card className="bg-gradient-to-br from-success/20 to-success/5 border-success/20">
-          <CardContent className="p-4 md:p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Receita Total</p>
-                <p className="text-2xl md:text-3xl font-bold text-success">{formatCurrency(stats.totalRevenue)}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  De todos os VIPs ativos
-                </p>
-              </div>
-              <DollarSign className="w-8 h-8 md:w-10 md:h-10 text-success" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-primary/20 to-primary/5 border-primary/20">
-          <CardContent className="p-4 md:p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total de VIPs</p>
-                <p className="text-2xl md:text-3xl font-bold text-primary">{stats.totalActive + stats.totalExpired}</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {stats.totalActive} ativos • {stats.totalExpired} expirados
-                </p>
-              </div>
-              <Users className="w-8 h-8 md:w-10 md:h-10 text-primary" />
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <StatsCard
+          title="Receita Total"
+          value={formatCurrency(stats.totalRevenue)}
+          icon={DollarSign}
+          description="De VIPs ativos"
+          color="success"
+        />
+        <StatsCard
+          title="Total de VIPs"
+          value={stats.totalActive + stats.totalExpired}
+          icon={Users}
+          description={`${stats.totalActive} ativos • ${stats.totalExpired} expirados`}
+        />
+        <StatsCard
+          title="Ativos"
+          value={stats.totalActive}
+          icon={Users}
+          description="VIPs atualmente ativos"
+          color="info"
+        />
+        <StatsCard
+          title="Expirando (7d)"
+          value={expiringSoonVips.length}
+          icon={Clock}
+          description="Nos próximos 7 dias"
+          color="warning"
+        />
       </div>
 
       {/* Segunda linha - Cards customizados e Centro de Notificações */}

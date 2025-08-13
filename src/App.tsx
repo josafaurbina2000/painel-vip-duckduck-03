@@ -24,7 +24,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <div className="min-h-screen bg-background text-foreground transition-colors duration-300 w-full">
+            <div className="min-h-screen bg-background bg-gradient-to-b from-muted/20 to-transparent text-foreground transition-colors duration-300 w-full">
               <Header />
               <Navigation />
               <main className="container mx-auto px-4 md:px-6 py-4 md:py-8">

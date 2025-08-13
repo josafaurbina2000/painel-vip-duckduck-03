@@ -31,15 +31,23 @@ const StatsCard = ({ title, value, icon: Icon, description, trend, color = 'defa
     info: 'text-info'
   };
 
+  const chipBgClasses = {
+    default: 'bg-primary/10',
+    success: 'bg-success/10',
+    warning: 'bg-warning/10',
+    danger: 'bg-danger/10',
+    info: 'bg-info/10',
+  } as const;
+
   return (
-    <Card className={`relative overflow-hidden bg-gradient-to-br ${colorClasses[color]} border transition-all duration-300 hover:scale-105 hover:shadow-lg h-full`}>
-      <CardContent className="p-4 h-full flex flex-col justify-between">
-        <div className="flex items-center justify-between">
+    <Card className={`card-elevated relative overflow-hidden bg-gradient-to-br ${colorClasses[color]} h-full`}>
+      <CardContent className="p-5 h-full flex flex-col justify-between">
+        <div className="flex items-start justify-between">
           <div className="space-y-1">
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
               {title}
             </p>
-            <p className="text-2xl font-bold tracking-tight">
+            <p className="text-3xl font-bold tracking-tight">
               {value}
             </p>
             {description && (
@@ -56,7 +64,7 @@ const StatsCard = ({ title, value, icon: Icon, description, trend, color = 'defa
               </div>
             )}
           </div>
-          <div className={`p-2 rounded-lg bg-background/50 ${iconColorClasses[color]}`}>
+          <div className={`${chipBgClasses[color]} ${iconColorClasses[color]} p-2.5 rounded-full`}>
             <Icon className="w-5 h-5" />
           </div>
         </div>

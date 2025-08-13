@@ -151,15 +151,33 @@
   }
 }
 
-/* Remoção da marca d'água do Lovable */
-a[href*="lovable.dev"], 
-iframe[src*="lovable.dev"], 
-div[style*="Edit with Lovable"], 
-.lovable-badge {
-  display: none !important;
-  opacity: 0 !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-  position: absolute !important;
-  z-index: -9999 !important;
+@layer components {
+  .card-elevated {
+    @apply bg-card border border-border/60 rounded-xl shadow-md transition-all duration-300 hover:shadow-lg;
+  }
+  .glass-dark {
+    @apply backdrop-blur-lg bg-background/70 border border-border/50;
+  }
+  .pill-nav {
+    @apply inline-flex items-center gap-1 rounded-full bg-muted/30 p-1;
+  }
+  .pill-nav-link {
+    @apply rounded-full px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted/60 transition-colors;
+  }
+  .pill-nav-link-active {
+    @apply bg-primary/15 text-primary ring-1 ring-primary/30;
+  }
 }
+
+/* Remoção da marca d'água do Lovable */
+ a[href*="lovable.dev"], 
+ iframe[src*="lovable.dev"], 
+ div[style*="Edit with Lovable"], 
+ .lovable-badge {
+   display: none !important;
+   opacity: 0 !important;
+   visibility: hidden !important;
+   pointer-events: none !important;
+   position: absolute !important;
+   z-index: -9999 !important;
+ }
