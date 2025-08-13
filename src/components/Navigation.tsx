@@ -18,17 +18,16 @@ const Navigation = () => {
 
   return (
     <nav className="bg-transparent">
-      <div className="container mx-auto px-6 py-2">
-        <div className="pill-nav">
+      <div className="container mx-auto px-6">
+        <div className="flex gap-8">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
-                `pill-nav-link ${isActive ? "pill-nav-link-active" : ""}`
+                `nav-link ${isActive ? "nav-link-active text-primary" : "text-muted-foreground"}`
               }
             >
-              <item.icon className="w-4 h-4" />
               <span>{item.label}</span>
             </NavLink>
           ))}

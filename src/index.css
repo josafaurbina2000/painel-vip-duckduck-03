@@ -149,25 +149,22 @@
     background: rgba(255, 255, 255, 0.7);
     border: 1px solid rgba(0, 0, 0, 0.08);
   }
+
+  /* Novos utilitários de design */
+  .card-elevated { @apply bg-card border border-border/60 rounded-xl shadow-md transition-all duration-300 hover:shadow-lg; }
+  .glass-dark { @apply backdrop-blur-lg bg-background/70 border border-border/50; }
+  .pill-nav { @apply inline-flex items-center gap-1 rounded-full bg-muted/30 p-1; }
+  .pill-nav-link { @apply rounded-full px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted/60 transition-colors; }
+  .pill-nav-link-active { @apply bg-primary/15 text-primary ring-1 ring-primary/30; }
+
+  /* Navegação com sublinhado animado */
+  .nav-link { @apply relative inline-flex items-center gap-2 px-1 py-4 text-sm font-medium transition-colors; }
+  .nav-link::after { content: ""; position: absolute; left: 0; bottom: 0; height: 2px; width: 0; background: hsl(var(--primary)); transition: width .25s ease; opacity: .9; }
+  .nav-link:hover::after { width: 100%; }
+  .nav-link-active::after { width: 100%; }
 }
 
-@layer components {
-  .card-elevated {
-    @apply bg-card border border-border/60 rounded-xl shadow-md transition-all duration-300 hover:shadow-lg;
-  }
-  .glass-dark {
-    @apply backdrop-blur-lg bg-background/70 border border-border/50;
-  }
-  .pill-nav {
-    @apply inline-flex items-center gap-1 rounded-full bg-muted/30 p-1;
-  }
-  .pill-nav-link {
-    @apply rounded-full px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-muted/60 transition-colors;
-  }
-  .pill-nav-link-active {
-    @apply bg-primary/15 text-primary ring-1 ring-primary/30;
-  }
-}
+
 
 /* Remoção da marca d'água do Lovable */
  a[href*="lovable.dev"], 

@@ -10,6 +10,7 @@ import VIPBadge from "@/components/VIPBadge";
 import NotificationSystem from "@/components/NotificationSystem";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
+import MonthlyRevenueChart from "@/components/MonthlyRevenueChart";
 
 const Dashboard = () => {
   const { vips, clearAllData } = useVIP();
@@ -30,6 +31,20 @@ const Dashboard = () => {
   const expiring7Days = vips.filter(vip => {
     const daysRemaining = calculateDaysRemaining(vip.endDate);
     return daysRemaining === 7;
+  });
+  // Dados de receita dos últimos 6 meses
+  const monthlyData = Array.from({ length: 6 }, (_, i) => {
+    const ref = new Date();
+    // do mais antigo para o mais recente
+    ref.setMonth(ref.getMonth() - (5 - i));
+    const monthLabel = ref.toLocaleString('pt-BR', { month: 'short' });
+    const revenue = vips
+      .filter(v => {
+        const d = new Date(v.createdAt);
+        return d.getMonth() === ref.getMonth() && d.getFullYear() === ref.getFullYear();
+      })
+      .reduce((sum, v) => sum + v.amountPaid, 0);
+    return { month: monthLabel, revenue };
   });
 
   const handleClearAllData = () => {
@@ -175,6 +190,8 @@ const Dashboard = () => {
           <NotificationSystem vips={vips} />
         </div>
       </div>
+
+      <MonthlyRevenueChart data={monthlyData} trend={stats.monthlyTrend} />
 
       {/* Grid principal com VIPs expirando e VIPs recentes */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
