@@ -22,13 +22,13 @@ const FileUpload: React.FC<FileUploadProps> = ({
   const { toast } = useToast();
 
   const validateFile = (file: File): boolean => {
-    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'];
+    const allowedTypes = ['image/png', 'application/pdf'];
     const maxSize = 5 * 1024 * 1024; // 5MB
 
     if (!allowedTypes.includes(file.type)) {
       toast({
         title: "Erro",
-        description: "Apenas arquivos PNG, JPG e PDF são permitidos.",
+        description: "Apenas arquivos PNG e PDF são permitidos.",
         variant: "destructive",
       });
       return false;
@@ -184,11 +184,11 @@ const FileUpload: React.FC<FileUploadProps> = ({
             Arraste e solte um arquivo aqui, ou clique para selecionar
           </p>
           <p className="text-xs text-muted-foreground mb-4">
-            PNG, JPG ou PDF, máximo 5MB
+            PNG ou PDF, máximo 5MB
           </p>
           <input
             type="file"
-            accept=".png,.jpg,.jpeg,.pdf"
+            accept=".png,.pdf"
             onChange={handleInputChange}
             className="hidden"
             id="file-upload"
