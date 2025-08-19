@@ -1,28 +1,6 @@
 import ThemeToggle from "@/components/ThemeToggle";
-import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 
 const Header = () => {
-  const { signOut, user } = useAuth();
-  const { toast } = useToast();
-
-  const handleSignOut = async () => {
-    const { error } = await signOut();
-    if (error) {
-      toast({
-        title: "Erro",
-        description: "Erro ao sair da conta",
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Logout realizado",
-        description: "Você foi desconectado com sucesso",
-      });
-    }
-  };
   return <header className="glass-dark sticky top-0 z-50">
       <div className="container mx-auto px-4 md:px-6 py-3 md:py-4">
         <div className="flex items-center justify-between">
@@ -40,17 +18,6 @@ const Header = () => {
           </div>
           
           <div className="flex items-center space-x-2">
-            {user && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleSignOut}
-                className="hidden sm:flex"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Sair
-              </Button>
-            )}
             <ThemeToggle />
           </div>
         </div>

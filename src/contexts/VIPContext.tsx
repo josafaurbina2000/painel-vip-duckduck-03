@@ -2,12 +2,10 @@
 import React, { createContext, useContext, ReactNode } from 'react';
 import { VIP } from '@/types/vip';
 import { useVIPs } from '@/hooks/useVIPs';
-import { useAuth } from '@/contexts/AuthContext';
 
 interface VIPContextType {
   vips: VIP[];
   isLoading: boolean;
-  user: any;
   addVIP: (vip: Omit<VIP, 'id' | 'status'>) => Promise<VIP>;
   updateVIP: (id: string, updates: Partial<VIP>) => Promise<VIP>;
   deleteVIP: (id: string) => Promise<void>;
@@ -31,7 +29,6 @@ interface VIPProviderProps {
 }
 
 export const VIPProvider: React.FC<VIPProviderProps> = ({ children }) => {
-  const { user } = useAuth();
   const vipHook = useVIPs();
 
   return (

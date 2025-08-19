@@ -4,13 +4,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { VIP, VIPFile } from '@/types/vip';
 import { calculateVIPStatus } from '@/utils/vipUtils';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
+
+const DEFAULT_USER_ID = '00000000-0000-0000-0000-000000000000';
 
 export const useVIPs = () => {
   const [vips, setVips] = useState<VIP[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
-  const { user } = useAuth();
 
   // Função para converter dados do Supabase para o tipo VIP
   const convertSupabaseToVIP = (data: any): VIP => {
@@ -69,13 +69,9 @@ export const useVIPs = () => {
 
   // Adicionar novo VIP
   const addVIP = async (newVipData: Omit<VIP, 'id' | 'status'>) => {
-    if (!user) {
-      throw new Error('Usuário deve estar autenticado para adicionar VIPs');
-    }
-
     try {
       const insertData = {
-        user_id: user.id,
+        user_id: DEFAULT_USER_ID,
         player_name: newVipData.playerName,
         start_date: newVipData.startDate.toISOString(),
         end_date: newVipData.endDate.toISOString(),
@@ -273,10 +269,8 @@ export const useVIPs = () => {
   };
 
   useEffect(() => {
-    if (user) {
-      fetchVIPs();
-    }
-  }, [user]);
+    fetchVIPs();
+  }, []);
 
   return {
     vips,
