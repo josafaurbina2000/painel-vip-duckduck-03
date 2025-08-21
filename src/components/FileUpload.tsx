@@ -25,10 +25,12 @@ const FileUpload: React.FC<FileUploadProps> = ({
     const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'];
     const maxSize = 5 * 1024 * 1024; // 5MB
 
+    console.log('Tipo do arquivo:', file.type, 'Nome:', file.name);
+    
     if (!allowedTypes.includes(file.type)) {
       toast({
         title: "Erro",
-        description: "Apenas arquivos PNG, JPG e PDF são permitidos.",
+        description: `Apenas arquivos PNG, JPG e PDF são permitidos. Tipo recebido: ${file.type}`,
         variant: "destructive",
       });
       return false;
