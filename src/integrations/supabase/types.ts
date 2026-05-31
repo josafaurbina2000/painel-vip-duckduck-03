@@ -14,7 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      vips: {
+        Row: {
+          amount_paid: number
+          created_at: string
+          duration_days: number
+          end_date: string
+          id: string
+          observations: string | null
+          payment_proof_data: string | null
+          payment_proof_name: string | null
+          payment_proof_size: number | null
+          payment_proof_type: string | null
+          player_name: string
+          start_date: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_paid?: number
+          created_at?: string
+          duration_days: number
+          end_date: string
+          id?: string
+          observations?: string | null
+          payment_proof_data?: string | null
+          payment_proof_name?: string | null
+          payment_proof_size?: number | null
+          payment_proof_type?: string | null
+          player_name: string
+          start_date: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          amount_paid?: number
+          created_at?: string
+          duration_days?: number
+          end_date?: string
+          id?: string
+          observations?: string | null
+          payment_proof_data?: string | null
+          payment_proof_name?: string | null
+          payment_proof_size?: number | null
+          payment_proof_type?: string | null
+          player_name?: string
+          start_date?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
